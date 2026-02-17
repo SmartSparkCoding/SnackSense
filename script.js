@@ -93,8 +93,7 @@ function showPrediction() {
   fortuneStrip.style.opacity = "1";
   fortuneStrip.style.transform = "scale(1)";
 
-  // Show rating buttons
-  document.getElementById("rating-buttons").style.opacity = "1";
+  ratingButtons.style.opacity = "1";
 }
 
 
