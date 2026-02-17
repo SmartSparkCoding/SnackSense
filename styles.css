@@ -1,5 +1,5 @@
 /* ===========================
-   GLOBAL STYLES for jacob's awesome definitely incredible snack sense website! ayayyaya
+   GLOBAL STYLES
 =========================== */
 
 body {
@@ -28,17 +28,84 @@ header h1 {
 =========================== */
 
 #cookie-container {
-  margin-top: 30px;
+  position: relative;
+  margin-top: 40px;
+  height: 260px; /* ensures space for falling halves */
 }
 
 #cookie-container img {
-  width: 200px;
+  width: 260px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
 
-#cookie-container img:hover {
+/* Whole cookie hover */
+#cookie-whole:hover {
   transform: scale(1.05);
+}
+
+/* Hide halves initially */
+#cookie-left,
+#cookie-right {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Clip the halves */
+#cookie-left {
+  clip-path: inset(0 50% 0 0);
+}
+
+#cookie-right {
+  clip-path: inset(0 0 0 50%);
+}
+
+/* ===========================
+   COOKIE ANIMATIONS
+=========================== */
+
+/* Shake animation */
+@keyframes cookie-shake {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  50% { transform: rotate(-5deg); }
+  75% { transform: rotate(4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.shake {
+  animation: cookie-shake 0.4s ease;
+}
+
+/* Grow effect */
+.grow {
+  transform: scale(1.2);
+}
+
+/* Falling halves */
+.fall-left {
+  animation: fallLeft 0.6s forwards ease-in;
+}
+
+.fall-right {
+  animation: fallRight 0.6s forwards ease-in;
+}
+
+@keyframes fallLeft {
+  to {
+    transform: translate(-200px, 300px) rotate(-40deg);
+    opacity: 0;
+  }
+}
+
+@keyframes fallRight {
+  to {
+    transform: translate(200px, 300px) rotate(40deg);
+    opacity: 0;
+  }
 }
 
 /* ===========================
@@ -52,11 +119,15 @@ header h1 {
   display: inline-block;
   border-radius: 6px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+
+  opacity: 0;
+  transform: scale(0.8);
+  transition: 0.4s ease;
 }
 
 #fortune-strip-text {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
 }
 
 /* ===========================
@@ -65,6 +136,8 @@ header h1 {
 
 #rating-buttons {
   margin-top: 25px;
+  opacity: 0;
+  transition: 0.4s ease;
 }
 
 #rating-buttons button {
@@ -126,12 +199,12 @@ footer button:hover {
 }
 
 /* ===========================
-   MODALS (HIDDEN BY DEFAULT)
+   MODALS
 =========================== */
 
 #stats-modal,
 #custom-snack-modal {
-  display: none; /* JS will toggle this */
+  display: none;
   background: white;
   padding: 20px;
   width: 80%;
@@ -139,17 +212,4 @@ footer button:hover {
   margin: 20px auto;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-}
-
-/* Cookie shake animation */
-@keyframes cookie-shake {
-  0% { transform: rotate(0deg); }
-  25% { transform: rotate(5deg); }
-  50% { transform: rotate(-5deg); }
-  75% { transform: rotate(4deg); }
-  100% { transform: rotate(0deg); }
-}
-
-.shake {
-  animation: cookie-shake 0.4s ease;
 }
