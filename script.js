@@ -1,4 +1,5 @@
 // script.js – snack sense v2 logic
+// by Jacob N for hack club
 
 /* ===========================
    ELEMENT GRABS
@@ -102,7 +103,7 @@ const defaultSnacks = [
   { name: "Mini Donuts", category: "Sweet" },
   { name: "Shortbread", category: "Sweet" },
   { name: "Salted Sticks", category: "Crispy" },
-  { name: "Popcorn Chicken Bites", category: "Savory" },
+  { name: "Popcorn Chicken Bites (snack pot)", category: "Savory" },
   { name: "Spicy Noodle Snack", category: "Spicy" },
   { name: "Cheese String", category: "Savory" },
   { name: "Yogurt Coated Raisins", category: "Sweet" },
@@ -150,7 +151,7 @@ const defaultSnacks = [
   { name: "Chocolate Coated Biscuit Sticks", category: "Chocolatey" }
 ];
 
-// this will hold the actual working snack list (defaults + filler + custom)
+// this will hold the actual working snack list (defaults + generated + custom)
 let snacks = [];
 
 // per-snack ratings: { [snackName]: { score: number } }
@@ -171,7 +172,7 @@ let currentSnack = null;
 let isCracking = false;
 
 /* ===========================
-   FIXED SNACK LIST BUILDER
+   INIT SNACK LIST
 =========================== */
 
 function buildDefaultSnackList() {
@@ -214,7 +215,6 @@ function buildDefaultSnackList() {
     "Herb Crackers", "Mini Pizza Bites", "Cheddar Squares"
   ];
 
-  // helper to guess category
   function guessCategory(name) {
     const n = name.toLowerCase();
     if (n.includes("sour")) return "Sour";
@@ -278,9 +278,13 @@ function saveTotalRuns() {
    WEIGHTED RANDOM SNACK PICK
 =========================== */
 
+// simple-ish weighting: base weight 1, plus category score influence
+// love = +2, hate = -2, so categories drift over time
 function getSnackWeight(snack) {
   const catScore = categoryScores[snack.category] || 0;
-  let weight = 1 + catScore * 0.4;
+  // base weight
+  let weight = 1 + catScore * 0.4; // each +2 love = +0.8 weight
+  // clamp so it never hits zero or negative
   if (weight < 0.2) weight = 0.2;
   return weight;
 }
@@ -300,6 +304,7 @@ function pickWeightedRandomSnack() {
       return snacks[i];
     }
   }
+  // fallback (shouldn't really happen)
   return snacks[snacks.length - 1];
 }
 
@@ -308,12 +313,15 @@ function pickWeightedRandomSnack() {
 =========================== */
 
 function resetToCookieScreen() {
+  // reset text
   fortuneText.textContent =
     "click the fortune cookie to get a prediction!";
 
+  // hide fortune + buttons
   fortuneStrip.classList.remove("visible");
   ratingButtons.classList.remove("visible");
 
+  // reset halves
   cookieLeft.style.display = "none";
   cookieRight.style.display = "none";
   cookieLeft.classList.remove("fall-left");
@@ -321,26 +329,33 @@ function resetToCookieScreen() {
   cookieLeft.style.opacity = "0";
   cookieRight.style.opacity = "0";
 
+  // show whole cookie again
   cookieWhole.style.display = "block";
   cookieWhole.classList.remove("shake");
   cookieWhole.classList.remove("grow");
 
+  // allow clicking again
   isCracking = false;
   currentSnack = null;
 }
 
 cookieWhole.addEventListener("click", () => {
+  // don't let user spam it while it's mid-animation
   if (isCracking) return;
   isCracking = true;
 
+  // start with a shake
   cookieWhole.classList.add("shake");
 
+  // after shake, do the "grow" and then split
   setTimeout(() => {
     cookieWhole.classList.add("grow");
 
     setTimeout(() => {
+      // hide whole cookie
       cookieWhole.style.display = "none";
 
+      // show halves and animate them falling
       cookieLeft.style.display = "block";
       cookieRight.style.display = "block";
       cookieLeft.style.opacity = "1";
@@ -349,6 +364,7 @@ cookieWhole.addEventListener("click", () => {
       cookieLeft.classList.add("fall-left");
       cookieRight.classList.add("fall-right");
 
+      // after halves fall, show the fortune strip + buttons
       setTimeout(() => {
         showPrediction();
       }, 650);
@@ -362,9 +378,13 @@ function showPrediction() {
 
   fortuneText.textContent = snack.name;
 
+  // show fortune "sliding out" of cookie
   fortuneStrip.classList.add("visible");
+
+  // show rating buttons
   ratingButtons.classList.add("visible");
 
+  // count this as a "run"
   totalRuns++;
   saveTotalRuns();
 }
@@ -374,7 +394,9 @@ function showPrediction() {
 =========================== */
 
 function applyRating(type) {
-  if (!currentSnack) return;
+  if (!currentSnack) {
+    return; // nothing to rate
+  }
 
   const snackName = currentSnack.name;
   const snackCategory = currentSnack.category;
@@ -386,13 +408,19 @@ function applyRating(type) {
   let delta = 0;
   if (type === "love") delta = 2;
   if (type === "hate") delta = -2;
+  // meh = 0, so no change
 
+  // update snack score
   snackRatings[snackName].score += delta;
+
+  // update category score
   categoryScores[snackCategory] += delta;
 
+  // save stuff
   saveRatings();
   saveCategoryScores();
 
+  // after rating, go back to cookie screen
   resetToCookieScreen();
 }
 
@@ -404,4 +432,146 @@ hateBtn.addEventListener("click", () => applyRating("hate"));
    STATS MODAL
 =========================== */
 
-function closeStatsModal()
+function closeStatsModal() {
+  statsModal.style.display = "none";
+}
+
+statsBtn.addEventListener("click", () => {
+  // build stats html fresh each time
+  let html = `<h2>Your Snack Stats</h2>`;
+
+  html += `<p><strong>Total fortunes shown:</strong> ${totalRuns}</p>`;
+
+  // category scores
+  html += `<h3>Category vibes</h3>`;
+  html += `<ul>`;
+  CATEGORIES.forEach((cat) => {
+    const score = categoryScores[cat] || 0;
+    html += `<li><strong>${cat}</strong>: ${score}</li>`;
+  });
+  html += `</ul>`;
+
+  // top snacks (sorted by score)
+  const ratedSnacks = Object.entries(snackRatings);
+  if (ratedSnacks.length > 0) {
+    ratedSnacks.sort((a, b) => b[1].score - a[1].score);
+    html += `<h3>Top snacks (by score)</h3>`;
+    html += `<ul>`;
+    ratedSnacks.slice(0, 10).forEach(([name, data]) => {
+      html += `<li><strong>${name}</strong>: ${data.score}</li>`;
+    });
+    html += `</ul>`;
+  } else {
+    html += `<p>You haven't rated any snacks yet. Crack that cookie!</p>`;
+  }
+
+  html += `
+    <div class="modal-actions">
+      <button onclick="(${closeStatsModal.toString()})();">Close</button>
+    </div>
+  `;
+
+  statsModal.innerHTML = html;
+  statsModal.style.display = "block";
+});
+
+/* ===========================
+   CUSTOM SNACK MODAL
+=========================== */
+
+function closeCustomModal() {
+  customModal.style.display = "none";
+}
+
+customBtn.addEventListener("click", () => {
+  // build category options
+  const options = CATEGORIES.map(
+    (cat) => `<option value="${cat}">${cat}</option>`
+  ).join("");
+
+  const html = `
+    <h2>Add a Custom Snack</h2>
+    <div class="modal-field">
+      <label for="newSnackInput">Snack name</label>
+      <input id="newSnackInput" placeholder="e.g. Super Sour Mega Worms" />
+    </div>
+    <div class="modal-field">
+      <label for="newSnackCategory">Category</label>
+      <select id="newSnackCategory">
+        ${options}
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button id="cancelCustomSnackBtn">Cancel</button>
+      <button id="addSnackBtn">Add snack</button>
+    </div>
+  `;
+
+  customModal.innerHTML = html;
+  customModal.style.display = "block";
+
+  const addBtn = document.getElementById("addSnackBtn");
+  const cancelBtn = document.getElementById("cancelCustomSnackBtn");
+  const nameInput = document.getElementById("newSnackInput");
+  const catSelect = document.getElementById("newSnackCategory");
+
+  addBtn.onclick = () => {
+    const newName = nameInput.value.trim();
+    const newCat = catSelect.value;
+
+    if (!newName) {
+      alert("please type a snack name first :)");
+      return;
+    }
+
+    snacks.push({ name: newName, category: newCat });
+    saveSnacks();
+
+    // make sure category has a score entry
+    if (typeof categoryScores[newCat] !== "number") {
+      categoryScores[newCat] = 0;
+      saveCategoryScores();
+    }
+
+    closeCustomModal();
+  };
+
+  cancelBtn.onclick = () => {
+    closeCustomModal();
+  };
+});
+
+/* ===========================
+   RESET EVERYTHING
+=========================== */
+
+resetBtn.addEventListener("click", () => {
+  if (!confirm("Really reset ALL snack data?")) return;
+
+  localStorage.removeItem("snackRatings_v2");
+  localStorage.removeItem("categoryScores_v2");
+  localStorage.removeItem("allSnacks_v2");
+  localStorage.removeItem("totalRuns_v2");
+
+  snackRatings = {};
+  categoryScores = {};
+  totalRuns = 0;
+
+  // rebuild snacks + category scores
+  buildDefaultSnackList();
+  saveSnacks();
+  CATEGORIES.forEach((cat) => {
+    categoryScores[cat] = 0;
+  });
+  saveCategoryScores();
+
+  resetToCookieScreen();
+  alert("All snack data reset!");
+});
+
+/* ===========================
+   INITIAL UI STATE
+=========================== */
+
+// make sure we start on the cookie screen
+resetToCookieScreen();
