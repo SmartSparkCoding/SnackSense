@@ -59,6 +59,4 @@ Open my link:
 Made with ❤️, ☕, and questionable snack choices by  
 **[Jacob](https://github.com/SmartSparkCoding)**
 
-Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
-
 ---
