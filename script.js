@@ -11,6 +11,9 @@ const cookieRight = document.getElementById("cookie-right");
 const fortuneStrip = document.getElementById("fortune-strip");
 const fortuneText = document.getElementById("fortune-strip-text");
 
+// Rating buttons container (needed for reveal)
+const ratingButtons = document.getElementById("rating-buttons");
+
 // Rating buttons
 const loveBtn = document.getElementById("love-button");
 const mehBtn = document.getElementById("meh-button");
