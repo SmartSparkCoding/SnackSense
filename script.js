@@ -12,9 +12,6 @@ const fortuneStrip = document.getElementById("fortune-strip");
 const fortuneText = document.getElementById("fortune-strip-text");
 const ratingButtons = document.getElementById("rating-buttons");
 
-// Rating buttons container (needed for reveal)
-const ratingButtons = document.getElementById("rating-buttons");
-
 // Rating buttons
 const loveBtn = document.getElementById("love-button");
 const mehBtn = document.getElementById("meh-button");
@@ -34,7 +31,7 @@ const customModal = document.getElementById("custom-snack-modal");
    SNACK DATA
 =========================== */
 
-let snacks = [
+let snacks = JSON.parse(localStorage.getItem("snackList")) || [
   "Chocolate Bar",
   "Crisps",
   "Gummy Bears",
@@ -50,6 +47,10 @@ function saveRatings() {
   localStorage.setItem("snackRatings", JSON.stringify(ratings));
 }
 
+function saveSnacks() {
+  localStorage.setItem("snackList", JSON.stringify(snacks));
+}
+
 
 /* ===========================
    COOKIE BREAK SEQUENCE
@@ -57,23 +58,18 @@ function saveRatings() {
 
 cookieWhole.addEventListener("click", () => {
 
-  // 1. Shake
   cookieWhole.classList.add("shake");
-
-  // 2. Grow slightly
   cookieWhole.classList.add("grow");
 
-  // 3. After shake, break the cookie
   setTimeout(() => {
     cookieWhole.style.display = "none";
+
     cookieLeft.style.display = "block";
     cookieRight.style.display = "block";
 
-    // Animate halves falling
     cookieLeft.classList.add("fall-left");
     cookieRight.classList.add("fall-right");
 
-    // Reveal fortune strip
     setTimeout(() => {
       showPrediction();
     }, 600);
@@ -145,7 +141,10 @@ customBtn.addEventListener("click", () => {
 
   document.getElementById("addSnackBtn").onclick = () => {
     const newSnack = document.getElementById("newSnackInput").value.trim();
-    if (newSnack) snacks.push(newSnack);
+    if (newSnack) {
+      snacks.push(newSnack);
+      saveSnacks();
+    }
   };
 });
 
@@ -157,5 +156,6 @@ customBtn.addEventListener("click", () => {
 resetBtn.addEventListener("click", () => {
   localStorage.clear();
   ratings = {};
+  snacks = [];
   alert("All data reset!");
 });
