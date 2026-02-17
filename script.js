@@ -467,12 +467,13 @@ statsBtn.addEventListener("click", () => {
 
   html += `
     <div class="modal-actions">
-      <button onclick="(${closeStatsModal.toString()})();">Close</button>
+      <button id="closeStatsBtn">Close</button>
     </div>
   `;
 
   statsModal.innerHTML = html;
   statsModal.style.display = "block";
+  document.getElementById("closeStatsBtn").onclick = closeStatsModal;
 });
 
 /* ===========================
