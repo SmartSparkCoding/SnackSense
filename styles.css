@@ -30,11 +30,10 @@ header h1 {
 #cookie-container {
   position: relative;
   margin-top: 40px;
-  height: 260px; /* ensures space for falling halves */
 }
 
 #cookie-container img {
-  width: 260px;
+  width: 380px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
