@@ -2,8 +2,11 @@
 // Select the cookie image
 const cookie = document.querySelector("#cookie-container img");
 
-// Add a click event
 cookie.addEventListener("click", () => {
-  // Visible feedback since you can't use DevTools
-  alert("Cookie clicked!");
+  cookie.classList.add("shake");
+
+  // Remove the class after animation ends so it can play again
+  setTimeout(() => {
+    cookie.classList.remove("shake");
+  }, 400);
 });
