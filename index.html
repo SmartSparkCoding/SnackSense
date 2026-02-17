@@ -1,42 +1,70 @@
+<!-- index.html – snack sense v2 with better animations + categories -->
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SnackSense</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snack Sense</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
 
   <body>
     <header>
+      <!-- lil welcome bit -->
       <h1>Welcome to <strong>Snack Sense</strong>!</h1>
       <p>Your snack destiny awaits...</p>
     </header>
 
-    <div id="cookie-container">
-      <img id="cookie-whole" src="main-fortune-cookie.png" alt="cookie">
-      <img id="cookie-left" src="main-fortune-cookie.png" alt="left half">
-      <img id="cookie-right" src="main-fortune-cookie.png" alt="right half">
-    </div>
+    <!-- cookie + fortune area -->
+    <main>
+      <div id="cookie-container">
+        <!-- whole cookie -->
+        <img
+          id="cookie-whole"
+          src="main-fortune-cookie.png"
+          alt="fortune cookie"
+        />
 
-    <div id="fortune-strip">
-      <p id="fortune-strip-text">Click the <strong>Fortune Cookie</strong> to get a prediction!</p>
-    </div>
+        <!-- cookie halves (same image, clipped in css) -->
+        <img
+          id="cookie-left"
+          src="main-fortune-cookie.png"
+          alt="left cookie half"
+        />
+        <img
+          id="cookie-right"
+          src="main-fortune-cookie.png"
+          alt="right cookie half"
+        />
 
-    <div id="rating-buttons">
-      <button id="love-button">Love</button>
-      <button id="meh-button">Meh...</button>
-      <button id="hate-button">HATE!</button>
-    </div>
+        <!-- fortune strip that "slides out" of cookie -->
+        <div id="fortune-strip">
+          <p id="fortune-strip-text">
+            click the <strong>fortune cookie</strong> to get a prediction!
+          </p>
+        </div>
+      </div>
+
+      <!-- rating buttons (hidden until a snack appears) -->
+      <div id="rating-buttons">
+        <button id="love-button">Love</button>
+        <button id="meh-button">Meh...</button>
+        <button id="hate-button">HATE!</button>
+      </div>
+    </main>
 
     <footer>
+      <!-- footer controls -->
       <button id="reset-btn">Reset <strong>ALL DATA!</strong></button>
       <button id="stats-btn">Your Stats</button>
       <button id="custom-snacks-btn">Add Custom Snacks</button>
       <p>Created by Jacob with Hot Chocolate...</p>
     </footer>
 
+    <!-- stats modal -->
     <div id="stats-modal"></div>
+
+    <!-- custom snack modal -->
     <div id="custom-snack-modal"></div>
 
     <script src="script.js"></script>
