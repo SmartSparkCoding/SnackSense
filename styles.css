@@ -241,6 +241,18 @@ footer button:hover {
   background: #ddd;
 }
 
+#footer-link {
+  color: #ff6b6b;
+  font-weight: bold;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+#footer-link:hover {
+  color: #ff4a4a;
+  text-decoration: underline;
+}
+
 /* ===========================
    MODALS
 =========================== */
