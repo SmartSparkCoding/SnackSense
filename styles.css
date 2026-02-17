@@ -50,6 +50,7 @@ header h1 {
   position: absolute;
   top: 0;
   left: 50%;
+  opacity: 0;
   transform: translateX(-50%);
 }
 
@@ -66,7 +67,6 @@ header h1 {
    COOKIE ANIMATIONS
 =========================== */
 
-/* Shake animation */
 @keyframes cookie-shake {
   0% { transform: rotate(0deg); }
   25% { transform: rotate(5deg); }
@@ -79,12 +79,10 @@ header h1 {
   animation: cookie-shake 0.4s ease;
 }
 
-/* Grow effect */
 .grow {
   transform: scale(1.2);
 }
 
-/* Falling halves */
 .fall-left {
   animation: fallLeft 0.6s forwards ease-in;
 }
