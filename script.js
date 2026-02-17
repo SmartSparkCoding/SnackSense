@@ -10,6 +10,7 @@ const cookieRight = document.getElementById("cookie-right");
 // Fortune strip
 const fortuneStrip = document.getElementById("fortune-strip");
 const fortuneText = document.getElementById("fortune-strip-text");
+const ratingButtons = document.getElementById("rating-buttons");
 
 // Rating buttons container (needed for reveal)
 const ratingButtons = document.getElementById("rating-buttons");
