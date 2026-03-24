@@ -1,4 +1,4 @@
-# 🍪 Snack Sense
+# Snack Sense
 
 Snack Sense is a fun little web app where you crack open a virtual fortune cookie to reveal a random snack prediction.  
 Every snack belongs to a category (sweet, sour, salty, fruity, spicy, chocolatey, crispy, savory, misc), and your ratings help shape what you see next.
@@ -7,7 +7,7 @@ The more you use it, the better it learns your taste.
 
 ---
 
-## ⭐ Features
+## Features
 
 - **Fortune Cookie Animation**  
   Click the cookie to crack it open and reveal your snack destiny.
