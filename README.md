@@ -36,7 +36,7 @@ The more you use it, the better it learns your taste.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - HTML  
 - CSS  
@@ -47,14 +47,14 @@ No frameworks, no dependencies — just clean front‑end code.
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 Open my link:
 <a href="https://snacksense.pages.dev/" target="_blank" alt="My Link">Click HERE</a>
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 Made with ❤️, ☕, and questionable snack choices by  
 **[Jacob](https://github.com/SmartSparkCoding)**
