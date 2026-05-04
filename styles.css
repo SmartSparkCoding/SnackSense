@@ -1,0 +1,139 @@
+body {
+  font-family: 'Inter', Arial, sans-serif;
+  background-color: #fff8e7;
+  color: #333;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  padding: 20px;
+}
+
+header h1 {
+  margin-bottom: 5px;
+}
+
+main {
+  margin-top: 20px;
+}
+
+#cookie-container {
+  position: relative;
+  margin: 40px auto 0;
+  width: 380px;
+  height: 260px;
+}
+
+#cookie-container img {
+  width: 380px;
+  cursor: pointer;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: transform 0.2s ease;
+}
+
+#cookie-whole:hover {
+  transform: translateX(-50%) scale(1.05);
+}
+
+#cookie-left,
+#cookie-right {
+  display: none;
+  top: 0;
+  opacity: 0;
+}
+
+#cookie-left {
+  clip-path: inset(0 50% 0 0);
+}
+
+#cookie-right {
+  clip-path: inset(0 0 0 50%);
+}
+
+#fortune-strip {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  transform: translate(-50%, -10px) scale(0.8);
+  background: #ffffff;
+  padding: 12px 18px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+#fortune-strip.visible {
+  opacity: 1;
+  transform: translate(-50%, -40px) scale(1);
+  pointer-events: auto;
+}
+
+#fortune-strip-text {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+@keyframes cookie-shake {
+  0% {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  20% {
+    transform: translateX(-50%) rotate(5deg);
+  }
+  40% {
+    transform: translateX(-50%) rotate(-5deg);
+  }
+  60% {
+    transform: translateX(-50%) rotate(4deg);
+  }
+  80% {
+    transform: translateX(-50%) rotate(-4deg);
+  }
+  100% {
+    transform: translateX(-50%) rotate(0deg);
+  }
+}
+
+.shake {
+  animation: cookie-shake 0.5s ease;
+}
+
+.grow {
+  transform: translateX(-50%) scale(1.15);
+}
+
+.fall-left {
+  animation: fallLeft 0.7s forwards ease-in;
+}
+
+.fall-right {
+  animation: fallRight 0.7s forwards ease-in;
+}
+
+@keyframes fallLeft {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translate(0, 0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translate(-180px, 260px) rotate(-40deg);
+  }
+}
+
+@keyframes fallRight {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translate(0, 0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translate(180px, 260px) rotate(40deg);
+  }
+}
