@@ -13,9 +13,12 @@ const hateBtn = document.getElementById("hate-button");
 const statsBtn = document.getElementById("stats-btn");
 const customBtn = document.getElementById("custom-snacks-btn");
 const resetBtn = document.getElementById("reset-btn");
+const achievementsBtn = document.getElementById("achievements-btn");
 
 const statsModal = document.getElementById("stats-modal");
 const customModal = document.getElementById("custom-snack-modal");
+const achievementsModal = document.getElementById("achievements-modal");
+const achievementToastContainer = document.getElementById("achievement-toast-container");
 const CATEGORIES = [
   "Sweet",
   "Sour",
@@ -146,6 +149,341 @@ let currentSnack = null;
 
 let isCracking = false;
 
+let userStats = JSON.parse(localStorage.getItem("userStats_v1")) || {};
+
+let achievementsUnlocked =
+  JSON.parse(localStorage.getItem("achievementsUnlocked_v1")) || {};
+
+const ACHIEVEMENTS = [
+  {
+    id: "votes_10",
+    title: "Cookie Critic I",
+    description: "Vote on 10 cookies.",
+    check: (ctx) => ctx.totalVotes >= 10
+  },
+  {
+    id: "votes_20",
+    title: "Cookie Critic II",
+    description: "Vote on 20 cookies.",
+    check: (ctx) => ctx.totalVotes >= 20
+  },
+  {
+    id: "votes_30",
+    title: "Cookie Critic III",
+    description: "Vote on 30 cookies.",
+    check: (ctx) => ctx.totalVotes >= 30
+  },
+  {
+    id: "votes_50",
+    title: "Cookie Critic IV",
+    description: "Vote on 50 cookies.",
+    check: (ctx) => ctx.totalVotes >= 50
+  },
+  {
+    id: "votes_100",
+    title: "Cookie Critic V",
+    description: "Vote on 100 cookies.",
+    check: (ctx) => ctx.totalVotes >= 100
+  },
+  {
+    id: "votes_200",
+    title: "Cookie Critic VI",
+    description: "Vote on 200 cookies.",
+    check: (ctx) => ctx.totalVotes >= 200
+  },
+  {
+    id: "votes_250",
+    title: "Cookie Critic VII",
+    description: "Vote on 250 cookies.",
+    check: (ctx) => ctx.totalVotes >= 250
+  },
+  {
+    id: "votes_400",
+    title: "Cookie Critic VIII",
+    description: "Vote on 400 cookies.",
+    check: (ctx) => ctx.totalVotes >= 400
+  },
+  {
+    id: "votes_500",
+    title: "Cookie Critic IX",
+    description: "Vote on 500 cookies.",
+    check: (ctx) => ctx.totalVotes >= 500
+  },
+  {
+    id: "votes_1000",
+    title: "Cookie Critic X",
+    description: "Vote on 1000 cookies.",
+    check: (ctx) => ctx.totalVotes >= 1000
+  },
+  {
+    id: "love_10",
+    title: "Love Button I",
+    description: "Press Love 10 times.",
+    check: (ctx) => ctx.loveVotes >= 10
+  },
+  {
+    id: "love_20",
+    title: "Love Button II",
+    description: "Press Love 20 times.",
+    check: (ctx) => ctx.loveVotes >= 20
+  },
+  {
+    id: "love_50",
+    title: "Love Button III",
+    description: "Press Love 50 times.",
+    check: (ctx) => ctx.loveVotes >= 50
+  },
+  {
+    id: "love_100",
+    title: "Love Button IV",
+    description: "Press Love 100 times.",
+    check: (ctx) => ctx.loveVotes >= 100
+  },
+  {
+    id: "meh_10",
+    title: "Meh Button I",
+    description: "Press Meh 10 times.",
+    check: (ctx) => ctx.mehVotes >= 10
+  },
+  {
+    id: "meh_20",
+    title: "Meh Button II",
+    description: "Press Meh 20 times.",
+    check: (ctx) => ctx.mehVotes >= 20
+  },
+  {
+    id: "meh_50",
+    title: "Meh Button III",
+    description: "Press Meh 50 times.",
+    check: (ctx) => ctx.mehVotes >= 50
+  },
+  {
+    id: "meh_100",
+    title: "Meh Button IV",
+    description: "Press Meh 100 times.",
+    check: (ctx) => ctx.mehVotes >= 100
+  },
+  {
+    id: "hate_10",
+    title: "Hate Button I",
+    description: "Press HATE 10 times.",
+    check: (ctx) => ctx.hateVotes >= 10
+  },
+  {
+    id: "hate_20",
+    title: "Hate Button II",
+    description: "Press HATE 20 times.",
+    check: (ctx) => ctx.hateVotes >= 20
+  },
+  {
+    id: "hate_50",
+    title: "Hate Button III",
+    description: "Press HATE 50 times.",
+    check: (ctx) => ctx.hateVotes >= 50
+  },
+  {
+    id: "hate_100",
+    title: "Hate Button IV",
+    description: "Press HATE 100 times.",
+    check: (ctx) => ctx.hateVotes >= 100
+  },
+  {
+    id: "picky_eater",
+    title: "Picky Eater",
+    description: "Get over 200 total category points and over 100 in one category.",
+    check: (ctx) => ctx.totalPositiveCategoryPoints > 200 && ctx.maxCategoryScore > 100
+  },
+  {
+    id: "shown_5",
+    title: "Fortune Opener I",
+    description: "Open 5 fortunes.",
+    check: (ctx) => ctx.snacksShown >= 5
+  },
+  {
+    id: "shown_10",
+    title: "Fortune Opener II",
+    description: "Open 10 fortunes.",
+    check: (ctx) => ctx.snacksShown >= 10
+  },
+  {
+    id: "shown_25",
+    title: "Fortune Opener III",
+    description: "Open 25 fortunes.",
+    check: (ctx) => ctx.snacksShown >= 25
+  },
+  {
+    id: "shown_50",
+    title: "Fortune Opener IV",
+    description: "Open 50 fortunes.",
+    check: (ctx) => ctx.snacksShown >= 50
+  },
+  {
+    id: "shown_100",
+    title: "Fortune Opener V",
+    description: "Open 100 fortunes.",
+    check: (ctx) => ctx.snacksShown >= 100
+  },
+  {
+    id: "shown_200",
+    title: "Fortune Opener VI",
+    description: "Open 200 fortunes.",
+    check: (ctx) => ctx.snacksShown >= 200
+  },
+  {
+    id: "custom_1",
+    title: "Snack Creator I",
+    description: "Add 1 custom snack.",
+    check: (ctx) => ctx.customSnacksAdded >= 1
+  },
+  {
+    id: "custom_5",
+    title: "Snack Creator II",
+    description: "Add 5 custom snacks.",
+    check: (ctx) => ctx.customSnacksAdded >= 5
+  },
+  {
+    id: "custom_10",
+    title: "Snack Creator III",
+    description: "Add 10 custom snacks.",
+    check: (ctx) => ctx.customSnacksAdded >= 10
+  },
+  {
+    id: "custom_20",
+    title: "Snack Creator IV",
+    description: "Add 20 custom snacks.",
+    check: (ctx) => ctx.customSnacksAdded >= 20
+  },
+  {
+    id: "unique_5",
+    title: "Taste Explorer I",
+    description: "Rate 5 different snacks.",
+    check: (ctx) => ctx.uniqueRatedSnacks >= 5
+  },
+  {
+    id: "unique_10",
+    title: "Taste Explorer II",
+    description: "Rate 10 different snacks.",
+    check: (ctx) => ctx.uniqueRatedSnacks >= 10
+  },
+  {
+    id: "unique_20",
+    title: "Taste Explorer III",
+    description: "Rate 20 different snacks.",
+    check: (ctx) => ctx.uniqueRatedSnacks >= 20
+  },
+  {
+    id: "unique_40",
+    title: "Taste Explorer IV",
+    description: "Rate 40 different snacks.",
+    check: (ctx) => ctx.uniqueRatedSnacks >= 40
+  },
+  {
+    id: "unique_75",
+    title: "Taste Explorer V",
+    description: "Rate 75 different snacks.",
+    check: (ctx) => ctx.uniqueRatedSnacks >= 75
+  },
+  {
+    id: "category_20",
+    title: "Category Specialist I",
+    description: "Reach 20 points in one category.",
+    check: (ctx) => ctx.maxCategoryScore >= 20
+  },
+  {
+    id: "category_40",
+    title: "Category Specialist II",
+    description: "Reach 40 points in one category.",
+    check: (ctx) => ctx.maxCategoryScore >= 40
+  },
+  {
+    id: "category_60",
+    title: "Category Specialist III",
+    description: "Reach 60 points in one category.",
+    check: (ctx) => ctx.maxCategoryScore >= 60
+  },
+  {
+    id: "category_80",
+    title: "Category Specialist IV",
+    description: "Reach 80 points in one category.",
+    check: (ctx) => ctx.maxCategoryScore >= 80
+  },
+  {
+    id: "category_120",
+    title: "Category Specialist V",
+    description: "Reach 120 points in one category.",
+    check: (ctx) => ctx.maxCategoryScore >= 120
+  },
+  {
+    id: "sweet_tooth",
+    title: "Sweet Spot",
+    description: "Cast at least 25 Love votes and at least double your HATE votes.",
+    check: (ctx) => ctx.loveVotes >= 25 && ctx.loveVotes >= ctx.hateVotes * 2
+  },
+  {
+    id: "balanced_taster",
+    title: "Balanced Taster",
+    description: "Use Love, Meh, and HATE at least 10 times each.",
+    check: (ctx) => ctx.loveVotes >= 10 && ctx.mehVotes >= 10 && ctx.hateVotes >= 10
+  },
+  {
+    id: "controversial",
+    title: "Controversial Palate",
+    description: "Use HATE 50 times.",
+    check: (ctx) => ctx.hateVotes >= 50
+  },
+  {
+    id: "neutral_master",
+    title: "Neutral Master",
+    description: "Use Meh 50 times.",
+    check: (ctx) => ctx.mehVotes >= 50
+  },
+  {
+    id: "marathon_voter",
+    title: "Marathon Voter",
+    description: "Cast 1500 total votes.",
+    check: (ctx) => ctx.totalVotes >= 1500
+  }
+];
+
+if (!userStats || typeof userStats !== "object" || Array.isArray(userStats)) {
+  userStats = {};
+}
+
+if (
+  !achievementsUnlocked ||
+  typeof achievementsUnlocked !== "object" ||
+  Array.isArray(achievementsUnlocked)
+) {
+  achievementsUnlocked = {};
+}
+
+function ensureUserStatsShape() {
+  const defaults = {
+    totalVotes: 0,
+    loveVotes: 0,
+    mehVotes: 0,
+    hateVotes: 0,
+    snacksShown: 0,
+    customSnacksAdded: 0,
+    uniqueRatedSnacks: 0
+  };
+
+  Object.keys(defaults).forEach((key) => {
+    if (typeof userStats[key] !== "number" || Number.isNaN(userStats[key])) {
+      userStats[key] = defaults[key];
+    }
+  });
+
+  if (userStats.snacksShown < totalRuns) {
+    userStats.snacksShown = totalRuns;
+  }
+
+  const uniqueRated = Object.keys(snackRatings).length;
+  if (userStats.uniqueRatedSnacks < uniqueRated) {
+    userStats.uniqueRatedSnacks = uniqueRated;
+  }
+}
+
 function buildDefaultSnackList() {
   snacks = [...defaultSnacks];
 
@@ -226,6 +564,122 @@ function saveSnacks() {
 
 function saveTotalRuns() {
   localStorage.setItem("totalRuns_v2", String(totalRuns));
+}
+
+function saveUserStats() {
+  localStorage.setItem("userStats_v1", JSON.stringify(userStats));
+}
+
+function saveAchievementsUnlocked() {
+  localStorage.setItem("achievementsUnlocked_v1", JSON.stringify(achievementsUnlocked));
+}
+
+function getAchievementContext() {
+  const categoryValues = CATEGORIES.map((cat) => Number(categoryScores[cat] || 0));
+  const maxCategoryScore = categoryValues.length > 0 ? Math.max(...categoryValues) : 0;
+  const totalPositiveCategoryPoints = categoryValues.reduce(
+    (sum, value) => sum + (value > 0 ? value : 0),
+    0
+  );
+
+  return {
+    totalVotes: userStats.totalVotes,
+    loveVotes: userStats.loveVotes,
+    mehVotes: userStats.mehVotes,
+    hateVotes: userStats.hateVotes,
+    snacksShown: userStats.snacksShown,
+    customSnacksAdded: userStats.customSnacksAdded,
+    uniqueRatedSnacks: userStats.uniqueRatedSnacks,
+    maxCategoryScore,
+    totalPositiveCategoryPoints
+  };
+}
+
+function showAchievementToast(achievement) {
+  if (!achievementToastContainer) return;
+
+  const toast = document.createElement("div");
+  toast.className = "achievement-toast";
+
+  const heading = document.createElement("strong");
+  heading.textContent = "Achievement unlocked";
+
+  const title = document.createElement("div");
+  title.textContent = achievement.title;
+
+  const detail = document.createElement("div");
+  detail.textContent = achievement.description;
+
+  toast.appendChild(heading);
+  toast.appendChild(title);
+  toast.appendChild(detail);
+
+  achievementToastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3200);
+}
+
+function evaluateAchievements(showToasts = true) {
+  const ctx = getAchievementContext();
+  const newlyUnlocked = [];
+
+  ACHIEVEMENTS.forEach((achievement) => {
+    if (achievementsUnlocked[achievement.id]) return;
+    if (!achievement.check(ctx)) return;
+
+    achievementsUnlocked[achievement.id] = Date.now();
+    newlyUnlocked.push(achievement);
+  });
+
+  if (newlyUnlocked.length > 0) {
+    saveAchievementsUnlocked();
+    if (showToasts) {
+      newlyUnlocked.forEach((achievement) => {
+        showAchievementToast(achievement);
+      });
+    }
+  }
+}
+
+function closeAchievementsModal() {
+  achievementsModal.style.display = "none";
+}
+
+function renderAchievementsModal() {
+  const unlockedCount = ACHIEVEMENTS.filter(
+    (achievement) => !!achievementsUnlocked[achievement.id]
+  ).length;
+
+  let html = `<h2>Achievements</h2>`;
+  html += `<p><strong>${unlockedCount}/${ACHIEVEMENTS.length}</strong> unlocked</p>`;
+  html += `<div class="achievements-list">`;
+
+  ACHIEVEMENTS.forEach((achievement) => {
+    const unlockedAt = achievementsUnlocked[achievement.id];
+    const stateClass = unlockedAt ? "unlocked" : "locked";
+    const statusText = unlockedAt
+      ? `Unlocked on ${new Date(unlockedAt).toLocaleDateString()}`
+      : "Locked";
+
+    html += `<div class="achievement-item ${stateClass}">`;
+    html += `<h4>${achievement.title}</h4>`;
+    html += `<p>${achievement.description}</p>`;
+    html += `<div class="achievement-meta">${statusText}</div>`;
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  html += `
+    <div class="modal-actions">
+      <button id="closeAchievementsBtn">Close</button>
+    </div>
+  `;
+
+  achievementsModal.innerHTML = html;
+  achievementsModal.style.display = "block";
+  document.getElementById("closeAchievementsBtn").onclick = closeAchievementsModal;
 }
 
 function getSnackWeight(snack) {
@@ -313,7 +767,10 @@ function showPrediction() {
   ratingButtons.classList.add("visible");
 
   totalRuns++;
+  userStats.snacksShown = totalRuns;
   saveTotalRuns();
+  saveUserStats();
+  evaluateAchievements();
 }
 
 function applyRating(type) {
@@ -323,6 +780,7 @@ function applyRating(type) {
 
   const snackName = currentSnack.name;
   const snackCategory = currentSnack.category;
+  const isNewSnackRating = !snackRatings[snackName];
 
   if (!snackRatings[snackName]) {
     snackRatings[snackName] = { score: 0 };
@@ -332,12 +790,23 @@ function applyRating(type) {
   if (type === "love") delta = 2;
   if (type === "hate") delta = -2;
 
+  userStats.totalVotes += 1;
+  if (type === "love") userStats.loveVotes += 1;
+  if (type === "meh") userStats.mehVotes += 1;
+  if (type === "hate") userStats.hateVotes += 1;
+
   snackRatings[snackName].score += delta;
 
   categoryScores[snackCategory] += delta;
 
+  if (isNewSnackRating) {
+    userStats.uniqueRatedSnacks = Object.keys(snackRatings).length;
+  }
+
   saveRatings();
   saveCategoryScores();
+  saveUserStats();
+  evaluateAchievements();
 
   resetToCookieScreen();
 }
@@ -345,6 +814,7 @@ function applyRating(type) {
 loveBtn.addEventListener("click", () => applyRating("love"));
 mehBtn.addEventListener("click", () => applyRating("meh"));
 hateBtn.addEventListener("click", () => applyRating("hate"));
+achievementsBtn.addEventListener("click", renderAchievementsModal);
 
 function closeStatsModal() {
   statsModal.style.display = "none";
@@ -433,6 +903,9 @@ customBtn.addEventListener("click", () => {
 
     snacks.push({ name: newName, category: newCat });
     saveSnacks();
+    userStats.customSnacksAdded += 1;
+    saveUserStats();
+    evaluateAchievements();
 
     if (typeof categoryScores[newCat] !== "number") {
       categoryScores[newCat] = 0;
@@ -454,10 +927,22 @@ resetBtn.addEventListener("click", () => {
   localStorage.removeItem("categoryScores_v2");
   localStorage.removeItem("allSnacks_v2");
   localStorage.removeItem("totalRuns_v2");
+  localStorage.removeItem("userStats_v1");
+  localStorage.removeItem("achievementsUnlocked_v1");
 
   snackRatings = {};
   categoryScores = {};
   totalRuns = 0;
+  userStats = {
+    totalVotes: 0,
+    loveVotes: 0,
+    mehVotes: 0,
+    hateVotes: 0,
+    snacksShown: 0,
+    customSnacksAdded: 0,
+    uniqueRatedSnacks: 0
+  };
+  achievementsUnlocked = {};
 
   buildDefaultSnackList();
   saveSnacks();
@@ -465,9 +950,16 @@ resetBtn.addEventListener("click", () => {
     categoryScores[cat] = 0;
   });
   saveCategoryScores();
+  saveUserStats();
+  saveAchievementsUnlocked();
+
+  closeAchievementsModal();
 
   resetToCookieScreen();
   alert("All snack data reset!");
 });
 
+ensureUserStatsShape();
+saveUserStats();
+evaluateAchievements(false);
 resetToCookieScreen();

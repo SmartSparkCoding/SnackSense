@@ -224,7 +224,8 @@ footer button:hover {
 }
 
 #stats-modal,
-#custom-snack-modal {
+#custom-snack-modal,
+#achievements-modal {
   display: none;
   background: white;
   padding: 20px;
@@ -237,8 +238,118 @@ footer button:hover {
 }
 
 #stats-modal h2,
-#custom-snack-modal h2 {
+#custom-snack-modal h2,
+#achievements-modal h2 {
   margin-top: 0;
+}
+
+#achievements-modal {
+  max-width: 560px;
+}
+
+.achievements-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.achievement-item {
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  padding: 10px 12px;
+  background: #fffef8;
+}
+
+.achievement-item h4 {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+}
+
+.achievement-item p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.achievement-item.unlocked {
+  border-color: #f2cd5c;
+  background: linear-gradient(120deg, #fff9de, #fff4c3);
+}
+
+.achievement-item.locked {
+  background: #f4f4f4;
+  border-color: #dfdfdf;
+  color: #888;
+  filter: grayscale(0.35);
+}
+
+.achievement-meta {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+#achievement-toast-container {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.achievement-toast {
+  min-width: 240px;
+  max-width: 300px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #fff3b0, #ffd86b);
+  color: #5a4300;
+  box-shadow: 0 0 0 rgba(255, 204, 0, 0.4);
+  animation: achievement-pop 3.2s ease forwards;
+}
+
+.achievement-toast strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+@keyframes achievement-pop {
+  0% {
+    transform: translateY(-8px) scale(0.95);
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(255, 204, 0, 0.1);
+  }
+  12% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    box-shadow: 0 0 18px rgba(255, 191, 0, 0.7);
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-4px) scale(0.98);
+    opacity: 0;
+    box-shadow: 0 0 8px rgba(255, 204, 0, 0.2);
+  }
+}
+
+@media (max-width: 640px) {
+  #achievement-toast-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .achievement-toast {
+    max-width: none;
+    min-width: 0;
+  }
 }
 
 .modal-actions {
