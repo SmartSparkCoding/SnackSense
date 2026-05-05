@@ -14,6 +14,7 @@ const statsBtn = document.getElementById("stats-btn");
 const customBtn = document.getElementById("custom-snacks-btn");
 const resetBtn = document.getElementById("reset-btn");
 const achievementsBtn = document.getElementById("achievements-btn");
+const exportDataBtn = document.getElementById("export-data-btn");
 
 const statsModal = document.getElementById("stats-modal");
 const customModal = document.getElementById("custom-snack-modal");
@@ -155,6 +156,9 @@ let userStats = JSON.parse(localStorage.getItem("userStats_v1")) || {};
 
 let achievementsUnlocked =
   JSON.parse(localStorage.getItem("achievementsUnlocked_v1")) || {};
+
+let customSnacksAddedList =
+  JSON.parse(localStorage.getItem("customSnacksAdded_v1")) || [];
 
 const ACHIEVEMENTS = [
   {
@@ -459,6 +463,14 @@ if (
   achievementsUnlocked = {};
 }
 
+if (!Array.isArray(customSnacksAddedList)) {
+  customSnacksAddedList = [];
+}
+
+customSnacksAddedList = customSnacksAddedList.filter(
+  (item) => item && typeof item.name === "string" && typeof item.category === "string"
+);
+
 function ensureUserStatsShape() {
   const defaults = {
     totalVotes: 0,
@@ -576,6 +588,10 @@ function saveAchievementsUnlocked() {
   localStorage.setItem("achievementsUnlocked_v1", JSON.stringify(achievementsUnlocked));
 }
 
+function saveCustomSnacksAddedList() {
+  localStorage.setItem("customSnacksAdded_v1", JSON.stringify(customSnacksAddedList));
+}
+
 function applyTheme(theme) {
   const normalizedTheme = theme === "dark" ? "dark" : "light";
   document.body.setAttribute("data-theme", normalizedTheme);
@@ -603,6 +619,195 @@ function setModalOpenState() {
     (modalEl) => modalEl && modalEl.style.display === "block"
   );
   document.body.classList.toggle("modal-open", anyModalOpen);
+}
+
+function getUserAddedCustomSnacks() {
+  return customSnacksAddedList;
+}
+
+function drawVotePieChart(votesData) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 540;
+  canvas.height = 320;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const centerX = 160;
+  const centerY = 160;
+  const radius = 100;
+  const total = votesData.reduce((sum, item) => sum + item.value, 0);
+
+  if (total <= 0) {
+    ctx.fillStyle = "#666";
+    ctx.font = "18px Inter, Arial";
+    ctx.fillText("No vote data yet", 70, 165);
+    return canvas;
+  }
+
+  let start = -Math.PI / 2;
+  votesData.forEach((item) => {
+    const angle = (item.value / total) * Math.PI * 2;
+    const end = start + angle;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, start, end);
+    ctx.closePath();
+    ctx.fillStyle = item.color;
+    ctx.fill();
+    start = end;
+  });
+
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.font = "14px Inter, Arial";
+  ctx.fillStyle = "#222";
+  ctx.fillText("Vote Breakdown", 70, 28);
+
+  let legendY = 80;
+  votesData.forEach((item) => {
+    ctx.fillStyle = item.color;
+    ctx.fillRect(320, legendY - 10, 16, 16);
+    ctx.fillStyle = "#222";
+    ctx.fillText(`${item.label}: ${item.value}`, 346, legendY + 2);
+    legendY += 30;
+  });
+
+  return canvas;
+}
+
+function exportDataToPdf() {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert("PDF library failed to load. Please refresh and try again.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const left = 40;
+  const right = pageWidth - 40;
+  let y = 44;
+
+  const userAddedCustomSnacks = getUserAddedCustomSnacks();
+  const unlockedAchievementIds = ACHIEVEMENTS
+    .filter((achievement) => !!achievementsUnlocked[achievement.id])
+    .map((achievement) => achievement.id);
+
+  function ensureSpace(heightNeeded) {
+    if (y + heightNeeded <= pageHeight - 36) return;
+    doc.addPage();
+    y = 44;
+  }
+
+  function sectionTitle(text) {
+    ensureSpace(30);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text(text, left, y);
+    y += 16;
+    doc.setDrawColor(31, 157, 141);
+    doc.setLineWidth(1.2);
+    doc.line(left, y, right, y);
+    y += 14;
+  }
+
+  function lines(items, lineHeight = 14) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10.5);
+    items.forEach((line) => {
+      const wrapped = doc.splitTextToSize(String(line), right - left);
+      wrapped.forEach((chunk) => {
+        ensureSpace(lineHeight + 2);
+        doc.text(chunk, left, y);
+        y += lineHeight;
+      });
+    });
+    y += 4;
+  }
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text("Snack Sense - Data Export", left, y);
+  y += 18;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(`Generated: ${new Date().toLocaleString()}`, left, y);
+  y += 20;
+
+  sectionTitle("Stats Summary");
+  lines([
+    `Fortunes shown: ${totalRuns}`,
+    `Total votes: ${userStats.totalVotes}`,
+    `Love votes: ${userStats.loveVotes}`,
+    `Meh votes: ${userStats.mehVotes}`,
+    `HATE votes: ${userStats.hateVotes}`,
+    `Unique snacks rated: ${userStats.uniqueRatedSnacks}`,
+    `Custom snacks added (tracked): ${userStats.customSnacksAdded}`,
+    `Theme: ${document.body.getAttribute("data-theme") || "light"}`
+  ]);
+
+  sectionTitle("Vote Pie Chart");
+  const chartCanvas = drawVotePieChart([
+    { label: "Love", value: userStats.loveVotes, color: "#ff6b6b" },
+    { label: "Meh", value: userStats.mehVotes, color: "#ffd93d" },
+    { label: "HATE", value: userStats.hateVotes, color: "#6c757d" }
+  ]);
+  if (chartCanvas) {
+    ensureSpace(220);
+    doc.addImage(chartCanvas.toDataURL("image/png"), "PNG", left, y, 420, 248);
+    y += 216;
+  }
+
+  sectionTitle("Achievements");
+  lines([
+    `Unlocked: ${unlockedAchievementIds.length}/${ACHIEVEMENTS.length}`
+  ]);
+  ACHIEVEMENTS.forEach((achievement) => {
+    const unlockedAt = achievementsUnlocked[achievement.id];
+    const status = unlockedAt
+      ? `Unlocked (${new Date(unlockedAt).toLocaleDateString()})`
+      : "Locked";
+    lines([`- ${achievement.title}: ${status}`]);
+  });
+
+  sectionTitle("Category Scores");
+  CATEGORIES.forEach((cat) => {
+    lines([`- ${cat}: ${Number(categoryScores[cat] || 0)}`]);
+  });
+
+  sectionTitle("Custom Snacks");
+  lines([
+    `Custom snacks added by user: ${userAddedCustomSnacks.length}`
+  ]);
+  if (userAddedCustomSnacks.length === 0) {
+    lines(["- None found"]);
+  } else {
+    userAddedCustomSnacks.forEach((snack) => {
+      lines([`- ${snack.name} (${snack.category})`]);
+    });
+  }
+
+  sectionTitle("Rated Snacks");
+  const ratedSnacks = Object.entries(snackRatings)
+    .map(([name, data]) => ({ name, score: Number(data.score || 0) }))
+    .sort((a, b) => b.score - a.score);
+  if (ratedSnacks.length === 0) {
+    lines(["- None rated yet"]);
+  } else {
+    ratedSnacks.forEach((snack) => {
+      lines([`- ${snack.name}: ${snack.score}`]);
+    });
+  }
+
+  doc.save(`snacksense-data-export-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 function getAchievementContext() {
@@ -848,6 +1053,9 @@ loveBtn.addEventListener("click", () => applyRating("love"));
 mehBtn.addEventListener("click", () => applyRating("meh"));
 hateBtn.addEventListener("click", () => applyRating("hate"));
 achievementsBtn.addEventListener("click", renderAchievementsModal);
+if (exportDataBtn) {
+  exportDataBtn.addEventListener("click", exportDataToPdf);
+}
 
 function closeStatsModal() {
   statsModal.style.display = "none";
@@ -940,6 +1148,14 @@ customBtn.addEventListener("click", () => {
 
     snacks.push({ name: newName, category: newCat });
     saveSnacks();
+
+    customSnacksAddedList.push({
+      name: newName,
+      category: newCat,
+      addedAt: Date.now()
+    });
+    saveCustomSnacksAddedList();
+
     userStats.customSnacksAdded += 1;
     saveUserStats();
     evaluateAchievements();
@@ -966,6 +1182,7 @@ resetBtn.addEventListener("click", () => {
   localStorage.removeItem("totalRuns_v2");
   localStorage.removeItem("userStats_v1");
   localStorage.removeItem("achievementsUnlocked_v1");
+  localStorage.removeItem("customSnacksAdded_v1");
 
   snackRatings = {};
   categoryScores = {};
@@ -980,6 +1197,7 @@ resetBtn.addEventListener("click", () => {
     uniqueRatedSnacks: 0
   };
   achievementsUnlocked = {};
+  customSnacksAddedList = [];
 
   buildDefaultSnackList();
   saveSnacks();
@@ -989,6 +1207,7 @@ resetBtn.addEventListener("click", () => {
   saveCategoryScores();
   saveUserStats();
   saveAchievementsUnlocked();
+  saveCustomSnacksAddedList();
 
   closeStatsModal();
   closeCustomModal();
