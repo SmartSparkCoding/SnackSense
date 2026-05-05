@@ -13,7 +13,6 @@
   --menu-border: #1f9d8d;
 }
 
-/* Cause font utility classes (examples). Replace <uniquifier> with your descriptive name */
 .cause-heading {
   font-family: "Cause", cursive;
   font-optical-sizing: auto;
@@ -86,7 +85,6 @@ body::before {
   z-index: 9000;
 }
 
-/* background image layer with adjustable opacity */
 body::after {
   content: "";
   position: fixed;
