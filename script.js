@@ -1126,6 +1126,7 @@ function showExportOptionsModal() {
     <div class="modal-actions">
       <button id="exportPdfBtn" style="width: 100%; margin-bottom: 8px;">📊 Export as PDF</button>
       <button id="exportJsonBtn" style="width: 100%; margin-bottom: 8px;">💾 Export as JSON Backup</button>
+      <button id="shareableCardBtn" style="width: 100%; margin-bottom: 8px;">🎨 Create Shareable Card</button>
       <button id="importJsonBtn" style="width: 100%; margin-bottom: 8px;">📂 Import from JSON</button>
       <button id="closeExportBtn" style="width: 100%;">Close</button>
     </div>
@@ -1145,6 +1146,10 @@ function showExportOptionsModal() {
     exportDataAsJson();
     exportOptionsModal.style.display = "none";
     setModalOpenState();
+  };
+
+  document.getElementById("shareableCardBtn").onclick = () => {
+    showShareableCardOptions();
   };
 
   document.getElementById("importJsonBtn").onclick = () => {
@@ -1441,6 +1446,140 @@ function importDataFromJson(file) {
     }
   };
   reader.readAsText(file);
+}
+
+function showShareableCardOptions() {
+  const exportOptionsModal = document.getElementById("export-options-modal");
+  let html = `<h2>Choose Card Style</h2>`;
+  html += `<p>Select what you want to show:</p>`;
+  html += `
+    <div class="modal-actions">
+      <button id="cardTopSnack" style="width: 100%; margin-bottom: 8px;">⭐ Top Snack</button>
+      <button id="cardWorstSnack" style="width: 100%; margin-bottom: 8px;">😤 Worst Snack</button>
+      <button id="cardAchievements" style="width: 100%; margin-bottom: 8px;">🏆 Achievement Count</button>
+      <button id="cardVoteBreakdown" style="width: 100%; margin-bottom: 8px;">📊 Vote Breakdown</button>
+      <button id="cardFavCategory" style="width: 100%; margin-bottom: 8px;">🎯 Favorite Category</button>
+      <button id="backToExportBtn" style="width: 100%;">Back</button>
+    </div>
+  `;
+
+  exportOptionsModal.innerHTML = html;
+
+  document.getElementById("cardTopSnack").onclick = () => {
+    generateShareableCard("topSnack");
+  };
+
+  document.getElementById("cardWorstSnack").onclick = () => {
+    generateShareableCard("worstSnack");
+  };
+
+  document.getElementById("cardAchievements").onclick = () => {
+    generateShareableCard("achievements");
+  };
+
+  document.getElementById("cardVoteBreakdown").onclick = () => {
+    generateShareableCard("voteBreakdown");
+  };
+
+  document.getElementById("cardFavCategory").onclick = () => {
+    generateShareableCard("favCategory");
+  };
+
+  document.getElementById("backToExportBtn").onclick = () => {
+    showExportOptionsModal();
+  };
+}
+
+function generateShareableCard(cardType) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 600;
+  canvas.height = 600;
+  const ctx = canvas.getContext("2d");
+
+  const bgGradient = ctx.createLinearGradient(0, 0, 600, 600);
+  bgGradient.addColorStop(0, "#1f9d8d");
+  bgGradient.addColorStop(1, "#0d5c52");
+
+  ctx.fillStyle = bgGradient;
+  ctx.fillRect(0, 0, 600, 600);
+
+  ctx.fillStyle = "white";
+  ctx.font = "bold 48px Inter, Arial, sans-serif";
+  ctx.textAlign = "center";
+
+  let title = "";
+  let content = "";
+
+  if (cardType === "topSnack") {
+    const ratedSnacks = Object.entries(snackRatings);
+    if (ratedSnacks.length > 0) {
+      ratedSnacks.sort((a, b) => b[1].score - a[1].score);
+      const topSnack = ratedSnacks[0][0];
+      title = "🍪 My Top Snack";
+      content = topSnack;
+    } else {
+      content = "No snacks rated yet!";
+    }
+  } else if (cardType === "worstSnack") {
+    const ratedSnacks = Object.entries(snackRatings);
+    if (ratedSnacks.length > 0) {
+      ratedSnacks.sort((a, b) => a[1].score - b[1].score);
+      const worstSnack = ratedSnacks[0][0];
+      title = "😤 My Worst Snack";
+      content = worstSnack;
+    } else {
+      content = "No snacks rated yet!";
+    }
+  } else if (cardType === "achievements") {
+    const unlockedCount = ACHIEVEMENTS.filter(
+      (a) => !!achievementsUnlocked[a.id]
+    ).length;
+    title = "🏆 Achievements";
+    content = `${unlockedCount}/${ACHIEVEMENTS.length}`;
+  } else if (cardType === "voteBreakdown") {
+    title = "📊 My Votes";
+    ctx.font = "bold 36px Inter, Arial, sans-serif";
+    ctx.fillText(title, 300, 100);
+    ctx.font = "24px Inter, Arial, sans-serif";
+    ctx.fillText(`❤️ Love: ${userStats.loveVotes}`, 300, 180);
+    ctx.fillText(`😐 Meh: ${userStats.mehVotes}`, 300, 240);
+    ctx.fillText(`😠 HATE: ${userStats.hateVotes}`, 300, 300);
+    ctx.fillText(`Total: ${userStats.totalVotes}`, 300, 380);
+    ctx.font = "14px Inter, Arial, sans-serif";
+    ctx.fillText("SnackSense | Made with 🍪 and choices", 300, 550);
+    downloadCardImage(canvas);
+    return;
+  } else if (cardType === "favCategory") {
+    const topCategory = CATEGORIES.reduce((best, cat) => {
+      const bestScore = Number(categoryScores[best] || 0);
+      const catScore = Number(categoryScores[cat] || 0);
+      return catScore > bestScore ? cat : best;
+    });
+    const score = categoryScores[topCategory] || 0;
+    title = "🎯 Favorite Category";
+    content = `${topCategory} (${score} pts)`;
+  }
+
+  ctx.font = "bold 36px Inter, Arial, sans-serif";
+  ctx.fillText(title, 300, 100);
+  ctx.font = "42px Inter, Arial, sans-serif";
+  ctx.fillText(content, 300, 280);
+  ctx.font = "14px Inter, Arial, sans-serif";
+  ctx.fillText("SnackSense | Made with 🍪 and choices", 300, 550);
+
+  downloadCardImage(canvas);
+}
+
+function downloadCardImage(canvas) {
+  const link = document.createElement("a");
+  link.href = canvas.toDataURL("image/png");
+  link.download = `snacksense-card-${new Date().toISOString().slice(0, 10)}.png`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  document.getElementById("export-options-modal").style.display = "none";
+  setModalOpenState();
 }
 
 function showTutorial() {
