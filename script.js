@@ -1504,7 +1504,7 @@ function generateShareableCard(cardType) {
   ctx.fillRect(0, 0, 600, 600);
 
   ctx.fillStyle = "white";
-  ctx.font = "bold 48px Inter, Arial, sans-serif";
+  ctx.font = "bold 48px 'Cause', cursive";
   ctx.textAlign = "center";
 
   let title = "";
@@ -1538,14 +1538,14 @@ function generateShareableCard(cardType) {
     content = `${unlockedCount}/${ACHIEVEMENTS.length}`;
   } else if (cardType === "voteBreakdown") {
     title = "📊 My Votes";
-    ctx.font = "bold 36px Inter, Arial, sans-serif";
+    ctx.font = "bold 36px 'Cause', cursive";
     ctx.fillText(title, 300, 100);
-    ctx.font = "24px Inter, Arial, sans-serif";
+    ctx.font = "24px 'Cause', cursive";
     ctx.fillText(`❤️ Love: ${userStats.loveVotes}`, 300, 180);
     ctx.fillText(`😐 Meh: ${userStats.mehVotes}`, 300, 240);
     ctx.fillText(`😠 HATE: ${userStats.hateVotes}`, 300, 300);
     ctx.fillText(`Total: ${userStats.totalVotes}`, 300, 380);
-    ctx.font = "14px Inter, Arial, sans-serif";
+    ctx.font = "14px 'Cause', cursive";
     ctx.fillText("SnackSense | Made with 🍪 and choices", 300, 550);
     downloadCardImage(canvas);
     return;
@@ -1560,11 +1560,11 @@ function generateShareableCard(cardType) {
     content = `${topCategory} (${score} pts)`;
   }
 
-  ctx.font = "bold 36px Inter, Arial, sans-serif";
+  ctx.font = "bold 36px 'Cause', cursive";
   ctx.fillText(title, 300, 100);
-  ctx.font = "42px Inter, Arial, sans-serif";
+  ctx.font = "42px 'Cause', cursive";
   ctx.fillText(content, 300, 280);
-  ctx.font = "14px Inter, Arial, sans-serif";
+  ctx.font = "14px 'Cause', cursive";
   ctx.fillText("SnackSense | Made with 🍪 and choices", 300, 550);
 
   downloadCardImage(canvas);

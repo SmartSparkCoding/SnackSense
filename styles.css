@@ -64,7 +64,7 @@ body {
 }
 
 body {
-  font-family: 'Inter', Arial, sans-serif;
+  font-family: 'Cause', cursive, 'Inter', Arial, sans-serif;
   background-color: var(--bg-main);
   --bg-image: url("light-bkg.png");
   --bg-image-opacity: 0.90;
