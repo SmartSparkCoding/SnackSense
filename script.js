@@ -1025,6 +1025,10 @@ function resetToCookieScreen() {
 }
 
 cookieWhole.addEventListener("click", () => {
+  crackCookie();
+});
+
+function crackCookie() {
   if (isCracking) return;
   isCracking = true;
 
@@ -1049,7 +1053,7 @@ cookieWhole.addEventListener("click", () => {
       }, 650);
     }, 150);
   }, 500);
-});
+}
 
 function showPrediction() {
   const snack = pickWeightedRandomSnack();
@@ -1172,7 +1176,6 @@ function closeStatsModal() {
 statsBtn.addEventListener("click", () => {
   let html = `<h2>Your Snack Stats</h2>`;
 
-  const avgVotesPerFortune = totalRuns > 0 ? (userStats.totalVotes / totalRuns).toFixed(2) : 0;
   const topCategory = CATEGORIES.reduce((best, cat) => {
     const bestScore = Number(categoryScores[best] || 0);
     const catScore = Number(categoryScores[cat] || 0);
@@ -1182,7 +1185,6 @@ statsBtn.addEventListener("click", () => {
 
   html += `<p><strong>Fortunes shown:</strong> ${totalRuns}</p>`;
   html += `<p><strong>Total votes:</strong> ${userStats.totalVotes}</p>`;
-  html += `<p><strong>Avg votes per fortune:</strong> ${avgVotesPerFortune}</p>`;
   html += `<p><strong>Unique snacks rated:</strong> ${userStats.uniqueRatedSnacks}</p>`;
   html += `<p><strong>Top category:</strong> ${topCategory} (${topCategoryScore} pts)</p>`;
 
@@ -1442,8 +1444,9 @@ function importDataFromJson(file) {
 }
 
 function showTutorial() {
+  crackCookie();
+
   const steps = [
-    { element: "#cookie-whole", text: "Click the fortune cookie to get a snack prediction!" },
     { element: "#rating-buttons", text: "Rate each snack: Love, Meh, or HATE" },
     { element: "#stats-btn", text: "View your detailed stats and favorite snacks" },
     { element: "#achievements-btn", text: "Check your achievements and rarity levels" },
@@ -1487,16 +1490,18 @@ function showTutorial() {
     document.getElementById("tutorial-pointer").style.display = "none";
   }
 
-  document.addEventListener("click", () => {
-    currentStep++;
-    if (currentStep < steps.length) {
-      showStep();
-    } else {
-      closeTutorial();
-    }
-  });
+  setTimeout(() => {
+    document.addEventListener("click", () => {
+      currentStep++;
+      if (currentStep < steps.length) {
+        showStep();
+      } else {
+        closeTutorial();
+      }
+    });
 
-  showStep();
+    showStep();
+  }, 1200);
 }
 
 ensureUserStatsShape();

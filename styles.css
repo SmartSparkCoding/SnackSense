@@ -15,7 +15,7 @@
 
 body[data-theme="dark"] {
   --bg-main: #14171c;
-  --text-main: #f3f5f8;
+  --text-main: #ffffff;
   --surface: #1f252d;
   --surface-muted: #2a313a;
   --border-soft: #3a434f;
@@ -25,6 +25,11 @@ body[data-theme="dark"] {
   --strip-shadow: rgba(0, 0, 0, 0.5);
   --footer-link: #ffa98f;
   --footer-link-hover: #ff8f70;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
@@ -313,6 +318,7 @@ footer button {
   border-radius: 6px;
   cursor: pointer;
   background: var(--button-bg);
+  color: var(--text-main);
   transition: background 0.2s ease;
 }
 
@@ -486,6 +492,7 @@ footer button:hover {
   border-radius: 6px;
   cursor: pointer;
   background: var(--button-bg);
+  color: var(--text-main);
   transition: background 0.2s ease;
 }
 
