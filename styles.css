@@ -13,6 +13,35 @@
   --menu-border: #1f9d8d;
 }
 
+/* Cause font utility classes (examples). Replace <uniquifier> with your descriptive name */
+.cause-heading {
+  font-family: "Cause", cursive;
+  font-optical-sizing: auto;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.cause-display {
+  font-family: "Cause", cursive;
+  font-optical-sizing: auto;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.cause-subtle {
+  font-family: "Cause", cursive;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.cause-cta {
+  font-family: "Cause", cursive;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+
 body[data-theme="dark"] {
   --bg-main: #14171c;
   --text-main: #ffffff;
@@ -25,6 +54,8 @@ body[data-theme="dark"] {
   --strip-shadow: rgba(0, 0, 0, 0.5);
   --footer-link: #ffa98f;
   --footer-link-hover: #ff8f70;
+  --bg-image: url("dark-bkg.png");
+  --bg-image-opacity: 0.75;
 }
 
 html,
@@ -35,6 +66,8 @@ body {
 body {
   font-family: 'Inter', Arial, sans-serif;
   background-color: var(--bg-main);
+  --bg-image: url("light-bkg.png");
+  --bg-image-opacity: 0.90;
   color: var(--text-main);
   text-align: center;
   margin: 0;
@@ -51,6 +84,20 @@ body::before {
   pointer-events: none;
   transition: opacity 0.2s ease;
   z-index: 9000;
+}
+
+/* background image layer with adjustable opacity */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: var(--bg-image-opacity, 1);
+  transition: opacity 0.25s ease;
 }
 
 body.modal-open::before {
