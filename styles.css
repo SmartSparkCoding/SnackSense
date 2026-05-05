@@ -525,9 +525,27 @@ footer button:hover {
 
   #stats-modal,
   #custom-snack-modal,
-  #achievements-modal {
+  #achievements-modal,
+  #export-options-modal,
+  #reset-confirm-modal {
     width: calc(100% - 24px);
     max-height: 82vh;
     padding: 16px;
   }
+}
+
+#tutorial-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+}
+
+#tutorial-pointer {
+  display: none;
+  position: fixed;
+  border: 3px solid #1f9d8d;
+  border-radius: 8px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+  z-index: 9501;
 }

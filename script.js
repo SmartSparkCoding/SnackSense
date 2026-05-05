@@ -165,288 +165,336 @@ const ACHIEVEMENTS = [
     id: "votes_10",
     title: "Cookie Critic I",
     description: "Vote on 10 cookies.",
+    rarity: "Common",
     check: (ctx) => ctx.totalVotes >= 10
   },
   {
     id: "votes_20",
     title: "Cookie Critic II",
     description: "Vote on 20 cookies.",
+    rarity: "Common",
     check: (ctx) => ctx.totalVotes >= 20
   },
   {
     id: "votes_30",
     title: "Cookie Critic III",
     description: "Vote on 30 cookies.",
+    rarity: "Common",
     check: (ctx) => ctx.totalVotes >= 30
   },
   {
     id: "votes_50",
     title: "Cookie Critic IV",
     description: "Vote on 50 cookies.",
+    rarity: "Rare",
     check: (ctx) => ctx.totalVotes >= 50
   },
   {
     id: "votes_100",
     title: "Cookie Critic V",
     description: "Vote on 100 cookies.",
+    rarity: "Rare",
     check: (ctx) => ctx.totalVotes >= 100
   },
   {
     id: "votes_200",
     title: "Cookie Critic VI",
     description: "Vote on 200 cookies.",
+    rarity: "Legendary",
     check: (ctx) => ctx.totalVotes >= 200
   },
   {
     id: "votes_250",
     title: "Cookie Critic VII",
     description: "Vote on 250 cookies.",
+    rarity: "Legendary",
     check: (ctx) => ctx.totalVotes >= 250
   },
   {
     id: "votes_400",
     title: "Cookie Critic VIII",
     description: "Vote on 400 cookies.",
+    rarity: "Legendary",
     check: (ctx) => ctx.totalVotes >= 400
   },
   {
     id: "votes_500",
     title: "Cookie Critic IX",
     description: "Vote on 500 cookies.",
+    rarity: "Legendary",
     check: (ctx) => ctx.totalVotes >= 500
   },
   {
     id: "votes_1000",
     title: "Cookie Critic X",
     description: "Vote on 1000 cookies.",
+    rarity: "Legendary",
     check: (ctx) => ctx.totalVotes >= 1000
   },
   {
     id: "love_10",
     title: "Love Button I",
     description: "Press Love 10 times.",
+    rarity: "Common",
     check: (ctx) => ctx.loveVotes >= 10
   },
   {
     id: "love_20",
     title: "Love Button II",
     description: "Press Love 20 times.",
+    rarity: "Common",
     check: (ctx) => ctx.loveVotes >= 20
   },
   {
     id: "love_50",
     title: "Love Button III",
     description: "Press Love 50 times.",
+    rarity: "Rare",
     check: (ctx) => ctx.loveVotes >= 50
   },
   {
     id: "love_100",
     title: "Love Button IV",
     description: "Press Love 100 times.",
+    rarity: "Legendary",
     check: (ctx) => ctx.loveVotes >= 100
   },
   {
     id: "meh_10",
     title: "Meh Button I",
     description: "Press Meh 10 times.",
+    rarity: "Common",
     check: (ctx) => ctx.mehVotes >= 10
   },
   {
     id: "meh_20",
     title: "Meh Button II",
     description: "Press Meh 20 times.",
+    rarity: "Common",
     check: (ctx) => ctx.mehVotes >= 20
   },
   {
     id: "meh_50",
     title: "Meh Button III",
     description: "Press Meh 50 times.",
+    rarity: "Rare",
     check: (ctx) => ctx.mehVotes >= 50
   },
   {
     id: "meh_100",
     title: "Meh Button IV",
     description: "Press Meh 100 times.",
+    rarity: "Legendary",
     check: (ctx) => ctx.mehVotes >= 100
   },
   {
     id: "hate_10",
     title: "Hate Button I",
     description: "Press HATE 10 times.",
+    rarity: "Common",
     check: (ctx) => ctx.hateVotes >= 10
   },
   {
     id: "hate_20",
     title: "Hate Button II",
     description: "Press HATE 20 times.",
+    rarity: "Common",
     check: (ctx) => ctx.hateVotes >= 20
   },
   {
     id: "hate_50",
     title: "Hate Button III",
     description: "Press HATE 50 times.",
+    rarity: "Rare",
     check: (ctx) => ctx.hateVotes >= 50
   },
   {
     id: "hate_100",
     title: "Hate Button IV",
     description: "Press HATE 100 times.",
+    rarity: "Legendary",
     check: (ctx) => ctx.hateVotes >= 100
   },
   {
     id: "picky_eater",
     title: "Picky Eater",
     description: "Get over 200 total category points and over 100 in one category.",
+    rarity: "Rare",
     check: (ctx) => ctx.totalPositiveCategoryPoints > 200 && ctx.maxCategoryScore > 100
   },
   {
     id: "shown_5",
     title: "Fortune Opener I",
     description: "Open 5 fortunes.",
+    rarity: "Common",
     check: (ctx) => ctx.snacksShown >= 5
   },
   {
     id: "shown_10",
     title: "Fortune Opener II",
     description: "Open 10 fortunes.",
+    rarity: "Common",
     check: (ctx) => ctx.snacksShown >= 10
   },
   {
     id: "shown_25",
     title: "Fortune Opener III",
     description: "Open 25 fortunes.",
+    rarity: "Common",
     check: (ctx) => ctx.snacksShown >= 25
   },
   {
     id: "shown_50",
     title: "Fortune Opener IV",
     description: "Open 50 fortunes.",
+    rarity: "Rare",
     check: (ctx) => ctx.snacksShown >= 50
   },
   {
     id: "shown_100",
     title: "Fortune Opener V",
     description: "Open 100 fortunes.",
+    rarity: "Rare",
     check: (ctx) => ctx.snacksShown >= 100
   },
   {
     id: "shown_200",
     title: "Fortune Opener VI",
     description: "Open 200 fortunes.",
+    rarity: "Legendary",
     check: (ctx) => ctx.snacksShown >= 200
   },
   {
     id: "custom_1",
     title: "Snack Creator I",
     description: "Add 1 custom snack.",
+    rarity: "Common",
     check: (ctx) => ctx.customSnacksAdded >= 1
   },
   {
     id: "custom_5",
     title: "Snack Creator II",
     description: "Add 5 custom snacks.",
+    rarity: "Rare",
     check: (ctx) => ctx.customSnacksAdded >= 5
   },
   {
     id: "custom_10",
     title: "Snack Creator III",
     description: "Add 10 custom snacks.",
+    rarity: "Rare",
     check: (ctx) => ctx.customSnacksAdded >= 10
   },
   {
     id: "custom_20",
     title: "Snack Creator IV",
     description: "Add 20 custom snacks.",
+    rarity: "Legendary",
     check: (ctx) => ctx.customSnacksAdded >= 20
   },
   {
     id: "unique_5",
     title: "Taste Explorer I",
     description: "Rate 5 different snacks.",
+    rarity: "Common",
     check: (ctx) => ctx.uniqueRatedSnacks >= 5
   },
   {
     id: "unique_10",
     title: "Taste Explorer II",
     description: "Rate 10 different snacks.",
+    rarity: "Rare",
     check: (ctx) => ctx.uniqueRatedSnacks >= 10
   },
   {
     id: "unique_20",
     title: "Taste Explorer III",
     description: "Rate 20 different snacks.",
+    rarity: "Rare",
     check: (ctx) => ctx.uniqueRatedSnacks >= 20
   },
   {
     id: "unique_40",
     title: "Taste Explorer IV",
     description: "Rate 40 different snacks.",
+    rarity: "Legendary",
     check: (ctx) => ctx.uniqueRatedSnacks >= 40
   },
   {
     id: "unique_75",
     title: "Taste Explorer V",
     description: "Rate 75 different snacks.",
+    rarity: "Legendary",
     check: (ctx) => ctx.uniqueRatedSnacks >= 75
   },
   {
     id: "category_20",
     title: "Category Specialist I",
     description: "Reach 20 points in one category.",
+    rarity: "Rare",
     check: (ctx) => ctx.maxCategoryScore >= 20
   },
   {
     id: "category_40",
     title: "Category Specialist II",
     description: "Reach 40 points in one category.",
+    rarity: "Rare",
     check: (ctx) => ctx.maxCategoryScore >= 40
   },
   {
     id: "category_60",
     title: "Category Specialist III",
     description: "Reach 60 points in one category.",
+    rarity: "Legendary",
     check: (ctx) => ctx.maxCategoryScore >= 60
   },
   {
     id: "category_80",
     title: "Category Specialist IV",
     description: "Reach 80 points in one category.",
+    rarity: "Legendary",
     check: (ctx) => ctx.maxCategoryScore >= 80
   },
   {
     id: "category_120",
     title: "Category Specialist V",
     description: "Reach 120 points in one category.",
+    rarity: "Legendary",
     check: (ctx) => ctx.maxCategoryScore >= 120
   },
   {
     id: "sweet_tooth",
     title: "Sweet Spot",
     description: "Cast at least 25 Love votes and at least double your HATE votes.",
+    rarity: "Rare",
     check: (ctx) => ctx.loveVotes >= 25 && ctx.loveVotes >= ctx.hateVotes * 2
   },
   {
     id: "balanced_taster",
     title: "Balanced Taster",
     description: "Use Love, Meh, and HATE at least 10 times each.",
+    rarity: "Rare",
     check: (ctx) => ctx.loveVotes >= 10 && ctx.mehVotes >= 10 && ctx.hateVotes >= 10
   },
   {
     id: "controversial",
     title: "Controversial Palate",
     description: "Use HATE 50 times.",
+    rarity: "Rare",
     check: (ctx) => ctx.hateVotes >= 50
   },
   {
     id: "neutral_master",
     title: "Neutral Master",
     description: "Use Meh 50 times.",
+    rarity: "Rare",
     check: (ctx) => ctx.mehVotes >= 50
   },
   {
     id: "marathon_voter",
     title: "Marathon Voter",
     description: "Cast 1500 total votes.",
+    rarity: "Legendary",
     check: (ctx) => ctx.totalVotes >= 1500
   }
 ];
@@ -1063,7 +1111,57 @@ mehBtn.addEventListener("click", () => applyRating("meh"));
 hateBtn.addEventListener("click", () => applyRating("hate"));
 achievementsBtn.addEventListener("click", renderAchievementsModal);
 if (exportDataBtn) {
-  exportDataBtn.addEventListener("click", exportDataToPdf);
+  exportDataBtn.addEventListener("click", showExportOptionsModal);
+}
+
+function showExportOptionsModal() {
+  const exportOptionsModal = document.getElementById("export-options-modal");
+  let html = `<h2>Export Your Data</h2>`;
+  html += `<p>Choose how you'd like to export your snack journey:</p>`;
+  html += `
+    <div class="modal-actions">
+      <button id="exportPdfBtn" style="width: 100%; margin-bottom: 8px;">📊 Export as PDF</button>
+      <button id="exportJsonBtn" style="width: 100%; margin-bottom: 8px;">💾 Export as JSON Backup</button>
+      <button id="importJsonBtn" style="width: 100%; margin-bottom: 8px;">📂 Import from JSON</button>
+      <button id="closeExportBtn" style="width: 100%;">Close</button>
+    </div>
+  `;
+
+  exportOptionsModal.innerHTML = html;
+  exportOptionsModal.style.display = "block";
+  setModalOpenState();
+
+  document.getElementById("exportPdfBtn").onclick = () => {
+    exportDataToPdf();
+    exportOptionsModal.style.display = "none";
+    setModalOpenState();
+  };
+
+  document.getElementById("exportJsonBtn").onclick = () => {
+    exportDataAsJson();
+    exportOptionsModal.style.display = "none";
+    setModalOpenState();
+  };
+
+  document.getElementById("importJsonBtn").onclick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        importDataFromJson(file);
+        exportOptionsModal.style.display = "none";
+        setModalOpenState();
+      }
+    };
+    input.click();
+  };
+
+  document.getElementById("closeExportBtn").onclick = () => {
+    exportOptionsModal.style.display = "none";
+    setModalOpenState();
+  };
 }
 
 function closeStatsModal() {
@@ -1202,8 +1300,47 @@ customBtn.addEventListener("click", () => {
 });
 
 resetBtn.addEventListener("click", () => {
-  if (!confirm("Really reset ALL snack data?")) return;
+  showResetConfirmModal();
+});
 
+function showResetConfirmModal() {
+  const resetConfirmModal = document.getElementById("reset-confirm-modal");
+  let html = `<h2>Reset All Data</h2>`;
+  html += `<p>Do you want to export your data before resetting?</p>`;
+  html += `
+    <div class="modal-actions">
+      <button id="exportPdfBeforeReset">Export as PDF</button>
+      <button id="exportJsonBeforeReset">Export as JSON</button>
+      <button id="skipExportReset">Skip Export</button>
+      <button id="cancelReset">Cancel</button>
+    </div>
+  `;
+
+  resetConfirmModal.innerHTML = html;
+  resetConfirmModal.style.display = "block";
+  setModalOpenState();
+
+  document.getElementById("exportPdfBeforeReset").onclick = () => {
+    exportDataToPdf();
+    performReset();
+  };
+
+  document.getElementById("exportJsonBeforeReset").onclick = () => {
+    exportDataAsJson();
+    performReset();
+  };
+
+  document.getElementById("skipExportReset").onclick = () => {
+    performReset();
+  };
+
+  document.getElementById("cancelReset").onclick = () => {
+    resetConfirmModal.style.display = "none";
+    setModalOpenState();
+  };
+}
+
+function performReset() {
   localStorage.removeItem("snackRatings_v2");
   localStorage.removeItem("categoryScores_v2");
   localStorage.removeItem("allSnacks_v2");
@@ -1240,10 +1377,127 @@ resetBtn.addEventListener("click", () => {
   closeStatsModal();
   closeCustomModal();
   closeAchievementsModal();
+  document.getElementById("reset-confirm-modal").style.display = "none";
+  setModalOpenState();
 
   resetToCookieScreen();
-  alert("All snack data reset!");
-});
+  showTutorial();
+  alert("All snack data reset! Tutorial will start now.");
+}
+
+function exportDataAsJson() {
+  const dataExport = {
+    timestamp: new Date().toISOString(),
+    stats: userStats,
+    snackRatings: snackRatings,
+    categoryScores: categoryScores,
+    totalRuns: totalRuns,
+    customSnacksAdded: customSnacksAddedList,
+    achievementsUnlocked: achievementsUnlocked
+  };
+
+  const dataStr = JSON.stringify(dataExport, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `snacksense-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importDataFromJson(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.stats || !data.snackRatings) {
+        alert("Invalid backup file format.");
+        return;
+      }
+
+      userStats = data.stats || userStats;
+      snackRatings = data.snackRatings || snackRatings;
+      categoryScores = data.categoryScores || categoryScores;
+      totalRuns = data.totalRuns || 0;
+      customSnacksAddedList = data.customSnacksAdded || [];
+      achievementsUnlocked = data.achievementsUnlocked || {};
+
+      saveUserStats();
+      saveRatings();
+      saveCategoryScores();
+      saveTotalRuns();
+      saveCustomSnacksAddedList();
+      saveAchievementsUnlocked();
+
+      alert("Data imported successfully!");
+      document.getElementById("import-file").value = "";
+    } catch (err) {
+      alert("Error reading file: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function showTutorial() {
+  const steps = [
+    { element: "#cookie-whole", text: "Click the fortune cookie to get a snack prediction!" },
+    { element: "#rating-buttons", text: "Rate each snack: Love, Meh, or HATE" },
+    { element: "#stats-btn", text: "View your detailed stats and favorite snacks" },
+    { element: "#achievements-btn", text: "Check your achievements and rarity levels" },
+    { element: "#export-data-btn", text: "Export your data as PDF, JSON, or shareable card" },
+    { element: "#theme-toggle-wrap", text: "Toggle dark mode for late-night snacking!" }
+  ];
+
+  let currentStep = 0;
+
+  function showStep() {
+    if (currentStep >= steps.length) {
+      closeTutorial();
+      return;
+    }
+
+    const step = steps[currentStep];
+    const element = document.querySelector(step.element);
+    if (!element) {
+      currentStep++;
+      showStep();
+      return;
+    }
+
+    const rect = element.getBoundingClientRect();
+    const overlay = document.getElementById("tutorial-overlay");
+    const pointer = document.getElementById("tutorial-pointer");
+
+    overlay.style.display = "block";
+    overlay.innerHTML = `<div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 9500;"></div>`;
+
+    pointer.style.display = "block";
+    pointer.style.left = rect.left + "px";
+    pointer.style.top = rect.top + "px";
+    pointer.style.width = rect.width + "px";
+    pointer.style.height = rect.height + "px";
+    pointer.innerHTML = `<div style="position: absolute; bottom: -80px; left: 0; background: #1f9d8d; color: white; padding: 12px; border-radius: 6px; width: 200px; font-size: 14px;">${step.text}</div>`;
+  }
+
+  function closeTutorial() {
+    document.getElementById("tutorial-overlay").style.display = "none";
+    document.getElementById("tutorial-pointer").style.display = "none";
+  }
+
+  document.addEventListener("click", () => {
+    currentStep++;
+    if (currentStep < steps.length) {
+      showStep();
+    } else {
+      closeTutorial();
+    }
+  });
+
+  showStep();
+}
 
 ensureUserStatsShape();
 saveUserStats();
