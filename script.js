@@ -893,15 +893,24 @@ function renderAchievementsModal() {
   html += `<p><strong>${unlockedCount}/${ACHIEVEMENTS.length}</strong> unlocked</p>`;
   html += `<div class="achievements-list">`;
 
-  ACHIEVEMENTS.forEach((achievement) => {
+  const sorted = [...ACHIEVEMENTS].sort((a, b) => {
+    const aUnlocked = !!achievementsUnlocked[a.id];
+    const bUnlocked = !!achievementsUnlocked[b.id];
+    if (aUnlocked !== bUnlocked) return aUnlocked ? -1 : 1;
+    return 0;
+  });
+
+  sorted.forEach((achievement) => {
     const unlockedAt = achievementsUnlocked[achievement.id];
     const stateClass = unlockedAt ? "unlocked" : "locked";
     const statusText = unlockedAt
       ? `Unlocked on ${new Date(unlockedAt).toLocaleDateString()}`
       : "Locked";
+    const rarity = achievement.rarity || "Unknown";
+    const rarityColor = rarity === "Legendary" ? "#ffd700" : rarity === "Rare" ? "#ff69b4" : "#999";
 
     html += `<div class="achievement-item ${stateClass}">`;
-    html += `<h4>${achievement.title}</h4>`;
+    html += `<h4>${achievement.title} <span style="color: ${rarityColor}; font-size: 0.85em;">[${rarity}]</span></h4>`;
     html += `<p>${achievement.description}</p>`;
     html += `<div class="achievement-meta">${statusText}</div>`;
     html += `</div>`;
@@ -1065,9 +1074,28 @@ function closeStatsModal() {
 statsBtn.addEventListener("click", () => {
   let html = `<h2>Your Snack Stats</h2>`;
 
-  html += `<p><strong>Total fortunes shown:</strong> ${totalRuns}</p>`;
+  const avgVotesPerFortune = totalRuns > 0 ? (userStats.totalVotes / totalRuns).toFixed(2) : 0;
+  const topCategory = CATEGORIES.reduce((best, cat) => {
+    const bestScore = Number(categoryScores[best] || 0);
+    const catScore = Number(categoryScores[cat] || 0);
+    return catScore > bestScore ? cat : best;
+  });
+  const topCategoryScore = Number(categoryScores[topCategory] || 0);
 
-  html += `<h3>Category vibes</h3>`;
+  html += `<p><strong>Fortunes shown:</strong> ${totalRuns}</p>`;
+  html += `<p><strong>Total votes:</strong> ${userStats.totalVotes}</p>`;
+  html += `<p><strong>Avg votes per fortune:</strong> ${avgVotesPerFortune}</p>`;
+  html += `<p><strong>Unique snacks rated:</strong> ${userStats.uniqueRatedSnacks}</p>`;
+  html += `<p><strong>Top category:</strong> ${topCategory} (${topCategoryScore} pts)</p>`;
+
+  html += `<h3>Vote Breakdown</h3>`;
+  html += `<ul>`;
+  html += `<li>❤️ Love: ${userStats.loveVotes}</li>`;
+  html += `<li>😐 Meh: ${userStats.mehVotes}</li>`;
+  html += `<li>😠 HATE: ${userStats.hateVotes}</li>`;
+  html += `</ul>`;
+
+  html += `<h3>All Category Scores</h3>`;
   html += `<ul>`;
   CATEGORIES.forEach((cat) => {
     const score = categoryScores[cat] || 0;
@@ -1078,9 +1106,9 @@ statsBtn.addEventListener("click", () => {
   const ratedSnacks = Object.entries(snackRatings);
   if (ratedSnacks.length > 0) {
     ratedSnacks.sort((a, b) => b[1].score - a[1].score);
-    html += `<h3>Top snacks (by score)</h3>`;
+    html += `<h3>Top rated snacks (${ratedSnacks.length} total)</h3>`;
     html += `<ul>`;
-    ratedSnacks.slice(0, 10).forEach(([name, data]) => {
+    ratedSnacks.forEach(([name, data]) => {
       html += `<li><strong>${name}</strong>: ${data.score}</li>`;
     });
     html += `</ul>`;
