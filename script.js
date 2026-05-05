@@ -19,6 +19,8 @@ const statsModal = document.getElementById("stats-modal");
 const customModal = document.getElementById("custom-snack-modal");
 const achievementsModal = document.getElementById("achievements-modal");
 const achievementToastContainer = document.getElementById("achievement-toast-container");
+const themeToggle = document.getElementById("theme-toggle");
+const THEME_STORAGE_KEY = "themeMode_v1";
 const CATEGORIES = [
   "Sweet",
   "Sour",
@@ -574,6 +576,35 @@ function saveAchievementsUnlocked() {
   localStorage.setItem("achievementsUnlocked_v1", JSON.stringify(achievementsUnlocked));
 }
 
+function applyTheme(theme) {
+  const normalizedTheme = theme === "dark" ? "dark" : "light";
+  document.body.setAttribute("data-theme", normalizedTheme);
+  if (themeToggle) {
+    themeToggle.checked = normalizedTheme === "dark";
+  }
+}
+
+function initTheme() {
+  const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  const prefersDark =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+  if (storedTheme === "dark" || storedTheme === "light") {
+    applyTheme(storedTheme);
+    return;
+  }
+
+  applyTheme(prefersDark ? "dark" : "light");
+}
+
+function setModalOpenState() {
+  const anyModalOpen = [statsModal, customModal, achievementsModal].some(
+    (modalEl) => modalEl && modalEl.style.display === "block"
+  );
+  document.body.classList.toggle("modal-open", anyModalOpen);
+}
+
 function getAchievementContext() {
   const categoryValues = CATEGORIES.map((cat) => Number(categoryScores[cat] || 0));
   const maxCategoryScore = categoryValues.length > 0 ? Math.max(...categoryValues) : 0;
@@ -645,6 +676,7 @@ function evaluateAchievements(showToasts = true) {
 
 function closeAchievementsModal() {
   achievementsModal.style.display = "none";
+  setModalOpenState();
 }
 
 function renderAchievementsModal() {
@@ -679,6 +711,7 @@ function renderAchievementsModal() {
 
   achievementsModal.innerHTML = html;
   achievementsModal.style.display = "block";
+  setModalOpenState();
   document.getElementById("closeAchievementsBtn").onclick = closeAchievementsModal;
 }
 
@@ -818,6 +851,7 @@ achievementsBtn.addEventListener("click", renderAchievementsModal);
 
 function closeStatsModal() {
   statsModal.style.display = "none";
+  setModalOpenState();
 }
 
 statsBtn.addEventListener("click", () => {
@@ -854,11 +888,13 @@ statsBtn.addEventListener("click", () => {
 
   statsModal.innerHTML = html;
   statsModal.style.display = "block";
+  setModalOpenState();
   document.getElementById("closeStatsBtn").onclick = closeStatsModal;
 });
 
 function closeCustomModal() {
   customModal.style.display = "none";
+  setModalOpenState();
 }
 
 customBtn.addEventListener("click", () => {
@@ -886,6 +922,7 @@ customBtn.addEventListener("click", () => {
 
   customModal.innerHTML = html;
   customModal.style.display = "block";
+  setModalOpenState();
 
   const addBtn = document.getElementById("addSnackBtn");
   const cancelBtn = document.getElementById("cancelCustomSnackBtn");
@@ -953,6 +990,8 @@ resetBtn.addEventListener("click", () => {
   saveUserStats();
   saveAchievementsUnlocked();
 
+  closeStatsModal();
+  closeCustomModal();
   closeAchievementsModal();
 
   resetToCookieScreen();
@@ -963,3 +1002,12 @@ ensureUserStatsShape();
 saveUserStats();
 evaluateAchievements(false);
 resetToCookieScreen();
+initTheme();
+
+if (themeToggle) {
+  themeToggle.addEventListener("change", () => {
+    const nextTheme = themeToggle.checked ? "dark" : "light";
+    applyTheme(nextTheme);
+    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  });
+}
