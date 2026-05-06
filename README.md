@@ -38,4 +38,3 @@ SnackSense/
 ```
 
 Made by Jacob.
-
