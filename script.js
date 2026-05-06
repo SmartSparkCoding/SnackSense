@@ -11,14 +11,12 @@ const mehBtn = document.getElementById("meh-button");
 const hateBtn = document.getElementById("hate-button");
 
 const statsBtn = document.getElementById("stats-btn");
-const customBtn = document.getElementById("custom-snacks-btn");
-const resetBtn = document.getElementById("reset-btn");
-const achievementsBtn = document.getElementById("achievements-btn");
-const exportDataBtn = document.getElementById("export-data-btn");
+const moreOptionsBtn = document.getElementById("more-options-btn");
 
 const statsModal = document.getElementById("stats-modal");
 const customModal = document.getElementById("custom-snack-modal");
 const achievementsModal = document.getElementById("achievements-modal");
+const moreOptionsModal = document.getElementById("more-options-modal");
 const achievementToastContainer = document.getElementById("achievement-toast-container");
 const themeToggle = document.getElementById("theme-toggle");
 const THEME_STORAGE_KEY = "themeMode_v1";
@@ -159,6 +157,12 @@ let achievementsUnlocked =
 
 let customSnacksAddedList =
   JSON.parse(localStorage.getItem("customSnacksAdded_v1")) || [];
+
+let snackInventory =
+  JSON.parse(localStorage.getItem("snackInventory_v1")) || {};
+
+let shoppingList =
+  JSON.parse(localStorage.getItem("shoppingList_v1")) || [];
 
 const ACHIEVEMENTS = [
   {
@@ -640,6 +644,50 @@ function saveCustomSnacksAddedList() {
   localStorage.setItem("customSnacksAdded_v1", JSON.stringify(customSnacksAddedList));
 }
 
+function saveSnackInventory() {
+  localStorage.setItem("snackInventory_v1", JSON.stringify(snackInventory));
+}
+
+function saveShoppingList() {
+  localStorage.setItem("shoppingList_v1", JSON.stringify(shoppingList));
+}
+
+function getHighestRatedSnacks(limit = 10) {
+  const rated = Object.entries(snackRatings)
+    .map(([name, data]) => ({
+      name,
+      score: Number(data.score || 0),
+      inInventory: snackInventory[name] || false
+    }))
+    .filter((s) => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+  return rated;
+}
+
+function getLowStockSnacks(limit = 5) {
+  const favorites = getHighestRatedSnacks(20);
+  const lowStock = favorites.filter((s) => !s.inInventory).slice(0, limit);
+  return lowStock;
+}
+
+function addToShoppingList(snackName) {
+  if (!shoppingList.includes(snackName)) {
+    shoppingList.push(snackName);
+    saveShoppingList();
+  }
+}
+
+function removeFromShoppingList(snackName) {
+  shoppingList = shoppingList.filter((s) => s !== snackName);
+  saveShoppingList();
+}
+
+function toggleInventory(snackName, hasIt) {
+  snackInventory[snackName] = hasIt;
+  saveSnackInventory();
+}
+
 function applyTheme(theme) {
   const normalizedTheme = theme === "dark" ? "dark" : "light";
   document.body.setAttribute("data-theme", normalizedTheme);
@@ -663,7 +711,7 @@ function initTheme() {
 }
 
 function setModalOpenState() {
-  const anyModalOpen = [statsModal, customModal, achievementsModal].some(
+  const anyModalOpen = [statsModal, customModal, achievementsModal, moreOptionsModal, document.getElementById("export-options-modal"), document.getElementById("reset-confirm-modal")].some(
     (modalEl) => modalEl && modalEl.style.display === "block"
   );
   document.body.classList.toggle("modal-open", anyModalOpen);
@@ -725,6 +773,51 @@ function drawVotePieChart(votesData) {
     ctx.fillStyle = "#222";
     ctx.fillText(`${item.label}: ${item.value}`, 346, legendY + 2);
     legendY += 30;
+  });
+
+  return canvas;
+}
+
+function drawCategoryBarChart() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 620;
+  canvas.height = 300;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  ctx.fillStyle = "var(--surface)";
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const padding = 40;
+  const chartWidth = canvas.width - padding * 2;
+  const chartHeight = canvas.height - padding * 2;
+  const barWidth = chartWidth / CATEGORIES.length - 8;
+  const maxScore = Math.max(...CATEGORIES.map((cat) => Number(categoryScores[cat] || 0)), 1);
+  const colors = ["#ff6b6b", "#ffa500", "#ffd93d", "#6bcf7f", "#4d79ff", "#c77dff", "#06ffa5", "#ff006e", "#8338ec"];
+
+  ctx.font = "12px Inter, Arial";
+  ctx.fillStyle = "#333";
+  ctx.textAlign = "center";
+  ctx.fillText("Category Preferences", canvas.width / 2, 20);
+
+  CATEGORIES.forEach((cat, idx) => {
+    const score = Number(categoryScores[cat] || 0);
+    const barHeight = (Math.max(score, 0) / maxScore) * chartHeight;
+    const x = padding + idx * (barWidth + 8);
+    const y = padding + chartHeight - barHeight;
+
+    ctx.fillStyle = colors[idx % colors.length];
+    ctx.fillRect(x, y, barWidth, barHeight);
+
+    ctx.fillStyle = "#333";
+    ctx.font = "11px Inter, Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(cat, x + barWidth / 2, padding + chartHeight + 15);
+
+    ctx.font = "10px Inter, Arial";
+    ctx.fillStyle = "#666";
+    ctx.fillText(String(score), x + barWidth / 2, y - 8);
   });
 
   return canvas;
@@ -1113,10 +1206,36 @@ function applyRating(type) {
 loveBtn.addEventListener("click", () => applyRating("love"));
 mehBtn.addEventListener("click", () => applyRating("meh"));
 hateBtn.addEventListener("click", () => applyRating("hate"));
-achievementsBtn.addEventListener("click", renderAchievementsModal);
-if (exportDataBtn) {
-  exportDataBtn.addEventListener("click", showExportOptionsModal);
+
+// More Options button
+if (moreOptionsBtn) {
+  moreOptionsBtn.addEventListener("click", showMoreOptionsModal);
 }
+
+// Keyboard shortcuts
+document.addEventListener("keydown", (event) => {
+  // Only activate if no modal is open and not typing in an input
+  const anyModalOpen = [statsModal, customModal, achievementsModal, moreOptionsModal, document.getElementById("export-options-modal"), document.getElementById("reset-confirm-modal")].some(
+    (modalEl) => modalEl && modalEl.style.display === "block"
+  );
+  
+  const isTyping = event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.tagName === "SELECT";
+  
+  if (anyModalOpen || isTyping) return;
+  
+  const key = event.key.toLowerCase();
+  
+  if (event.code === "Space" || key === " ") {
+    event.preventDefault();
+    crackCookie();
+  } else if (key === "l") {
+    applyRating("love");
+  } else if (key === "m") {
+    applyRating("meh");
+  } else if (key === "h") {
+    applyRating("hate");
+  }
+});
 
 function showExportOptionsModal() {
   const exportOptionsModal = document.getElementById("export-options-modal");
@@ -1200,6 +1319,34 @@ statsBtn.addEventListener("click", () => {
   html += `<li>😠 HATE: ${userStats.hateVotes}</li>`;
   html += `</ul>`;
 
+  // Shopping Assistant Section
+  const topSnacks = getHighestRatedSnacks(8);
+  if (topSnacks.length > 0) {
+    html += `<h3>🛒 Your Shopping Assistant</h3>`;
+    html += `<p style="font-size: 0.9em; opacity: 0.8;">Your highest-rated snacks to consider buying:</p>`;
+    html += `<div id="shopping-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">`;
+    topSnacks.forEach((snack) => {
+      const inList = shoppingList.includes(snack.name);
+      const inInventory = snackInventory[snack.name] || false;
+      const btnColor = inInventory ? "#6bcf7f" : inList ? "#ffd93d" : "#e0e0e0";
+      const btnText = inInventory ? "✓ Have It" : inList ? "+ To Buy" : "Add to List";
+      html += `<div style="padding: 8px; border-radius: 6px; background: var(--surface-muted); display: flex; justify-content: space-between; align-items: center;">`;
+      html += `<span style="font-size: 0.95em;"><strong>${snack.name}</strong></span>`;
+      html += `<button class="shopping-toggle-btn" data-snack="${snack.name}" style="padding: 4px 10px; border: none; border-radius: 4px; background: ${btnColor}; cursor: pointer; font-size: 0.85em;">${btnText}</button>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Charts unlock after 20 cookies opened
+  if (totalRuns >= 20) {
+    html += `<h3>📊 Your Insights</h3>`;
+    html += `<p style="font-size: 0.9em; opacity: 0.8;">Unlocked after opening 20 fortunes!</p>`;
+    html += `<div id="chart-container" style="margin: 20px 0;"></div>`;
+  } else {
+    html += `<p style="font-size: 0.9em; opacity: 0.8;">💡 Open ${20 - totalRuns} more fortunes to unlock visual insights!</p>`;
+  }
+
   html += `<h3>All Category Scores</h3>`;
   html += `<ul>`;
   CATEGORIES.forEach((cat) => {
@@ -1230,15 +1377,134 @@ statsBtn.addEventListener("click", () => {
   statsModal.innerHTML = html;
   statsModal.style.display = "block";
   setModalOpenState();
+
+  // Add charts if unlocked
+  if (totalRuns >= 20) {
+    const chartContainer = document.getElementById("chart-container");
+    const categoryChart = drawCategoryBarChart();
+    const voteChart = drawVotePieChart([
+      { label: "Love", value: userStats.loveVotes, color: "#ff6b6b" },
+      { label: "Meh", value: userStats.mehVotes, color: "#ffd93d" },
+      { label: "HATE", value: userStats.hateVotes, color: "#6c757d" }
+    ]);
+
+    if (categoryChart) {
+      const chartsWrapper = document.createElement("div");
+      chartsWrapper.style.cssText = "display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;";
+      
+      const categoryWrapper = document.createElement("div");
+      categoryWrapper.appendChild(categoryChart);
+      chartsWrapper.appendChild(categoryWrapper);
+
+      if (voteChart) {
+        const voteWrapper = document.createElement("div");
+        voteWrapper.appendChild(voteChart);
+        chartsWrapper.appendChild(voteWrapper);
+      }
+
+      chartContainer.appendChild(chartsWrapper);
+    }
+  }
+
+  // Shopping list button handlers
+  const shoppingBtns = statsModal.querySelectorAll(".shopping-toggle-btn");
+  shoppingBtns.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const snackName = btn.getAttribute("data-snack");
+      const inInventory = snackInventory[snackName] || false;
+      const inList = shoppingList.includes(snackName);
+
+      if (inInventory) {
+        toggleInventory(snackName, false);
+      } else if (inList) {
+        removeFromShoppingList(snackName);
+      } else {
+        addToShoppingList(snackName);
+      }
+      // Refresh stats to show updated shopping status
+      statsBtn.click();
+    });
+  });
+
   document.getElementById("closeStatsBtn").onclick = closeStatsModal;
 });
+
+function showMoreOptionsModal() {
+  let html = `<h2>More Options</h2>`;
+  html += `<div class="more-options-menu">`;
+  html += `<button id="add-custom-snack-opt" class="more-options-item">
+    <div class="option-icon">🍬</div>
+    <div class="option-text">
+      <strong>Add Custom Snacks</strong>
+      <span>Add your own snacks to the mix</span>
+    </div>
+  </button>`;
+  html += `<button id="view-achievements-opt" class="more-options-item">
+    <div class="option-icon">🏆</div>
+    <div class="option-text">
+      <strong>View Achievements</strong>
+      <span>See your unlocked achievements</span>
+    </div>
+  </button>`;
+  html += `<button id="export-data-opt" class="more-options-item">
+    <div class="option-icon">📤</div>
+    <div class="option-text">
+      <strong>Export Data</strong>
+      <span>Back up or share your data</span>
+    </div>
+  </button>`;
+  html += `<button id="reset-data-opt" class="more-options-item danger">
+    <div class="option-icon">⚠️</div>
+    <div class="option-text">
+      <strong>Reset All Data</strong>
+      <span>Start fresh with a new profile</span>
+    </div>
+  </button>`;
+  html += `</div>`;
+  html += `<div class="modal-actions">
+    <button id="closeMoreOptionsBtn">Close</button>
+  </div>`;
+
+  moreOptionsModal.innerHTML = html;
+  moreOptionsModal.style.display = "block";
+  setModalOpenState();
+
+  document.getElementById("add-custom-snack-opt").onclick = () => {
+    moreOptionsModal.style.display = "none";
+    setModalOpenState();
+    openCustomSnackModal();
+  };
+
+  document.getElementById("view-achievements-opt").onclick = () => {
+    moreOptionsModal.style.display = "none";
+    setModalOpenState();
+    renderAchievementsModal();
+  };
+
+  document.getElementById("export-data-opt").onclick = () => {
+    moreOptionsModal.style.display = "none";
+    setModalOpenState();
+    showExportOptionsModal();
+  };
+
+  document.getElementById("reset-data-opt").onclick = () => {
+    moreOptionsModal.style.display = "none";
+    setModalOpenState();
+    showResetConfirmModal();
+  };
+
+  document.getElementById("closeMoreOptionsBtn").onclick = () => {
+    moreOptionsModal.style.display = "none";
+    setModalOpenState();
+  };
+}
 
 function closeCustomModal() {
   customModal.style.display = "none";
   setModalOpenState();
 }
 
-customBtn.addEventListener("click", () => {
+function openCustomSnackModal() {
   const options = CATEGORIES.map(
     (cat) => `<option value="${cat}">${cat}</option>`
   ).join("");
@@ -1304,11 +1570,10 @@ customBtn.addEventListener("click", () => {
   cancelBtn.onclick = () => {
     closeCustomModal();
   };
-});
+}
 
-resetBtn.addEventListener("click", () => {
-  showResetConfirmModal();
-});
+// Custom and reset listeners are now through More Options modal
+// This code removed in favor of More Options menu
 
 function showResetConfirmModal() {
   const resetConfirmModal = document.getElementById("reset-confirm-modal");
@@ -1492,61 +1757,155 @@ function showShareableCardOptions() {
 
 function generateShareableCard(cardType) {
   const canvas = document.createElement("canvas");
-  canvas.width = 600;
-  canvas.height = 600;
+  canvas.width = 1080;
+  canvas.height = 1080;
   const ctx = canvas.getContext("2d");
 
-  const bgGradient = ctx.createLinearGradient(0, 0, 600, 600);
-  bgGradient.addColorStop(0, "#1f9d8d");
-  bgGradient.addColorStop(1, "#0d5c52");
+  // Helper functions
+  const drawRoundedRect = (x, y, w, h, r) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  };
 
+  // Card backgrounds by type
+  const cardConfigs = {
+    topSnack: {
+      gradient: ["#FF6B6B", "#FF8E72"],
+      emoji: "❤️",
+      accentColor: "#FF5252"
+    },
+    worstSnack: {
+      gradient: ["#6C757D", "#495057"],
+      emoji: "😤",
+      accentColor: "#495057"
+    },
+    achievements: {
+      gradient: ["#FFD93D", "#FFC107"],
+      emoji: "🏆",
+      accentColor: "#FFA500"
+    },
+    voteBreakdown: {
+      gradient: ["#4D79FF", "#7B68EE"],
+      emoji: "📊",
+      accentColor: "#6B5FFF"
+    },
+    favCategory: {
+      gradient: ["#06FFA5", "#00D98E"],
+      emoji: "🎯",
+      accentColor: "#00C77D"
+    }
+  };
+
+  const config = cardConfigs[cardType] || cardConfigs.topSnack;
+
+  // Background gradient
+  const bgGradient = ctx.createLinearGradient(0, 0, 1080, 1080);
+  bgGradient.addColorStop(0, config.gradient[0]);
+  bgGradient.addColorStop(1, config.gradient[1]);
   ctx.fillStyle = bgGradient;
-  ctx.fillRect(0, 0, 600, 600);
+  ctx.fillRect(0, 0, 1080, 1080);
+
+  // Decorative elements - light circles in background
+  ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+  ctx.beginPath();
+  ctx.arc(150, 150, 200, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(900, 900, 250, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Top accent bar
+  ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+  ctx.fillRect(0, 0, 1080, 8);
+
+  // Main content area with rounded background
+  ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+  drawRoundedRect(80, 200, 920, 600, 30);
+  ctx.fill();
+
+  // Border
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+  ctx.lineWidth = 3;
+  drawRoundedRect(80, 200, 920, 600, 30);
+  ctx.stroke();
 
   ctx.fillStyle = "white";
-  ctx.font = "bold 48px 'Cause', cursive";
   ctx.textAlign = "center";
+
+  // Large emoji at top
+  ctx.font = "120px Arial";
+  ctx.fillText(config.emoji, 540, 360);
 
   let title = "";
   let content = "";
+  let subtitle = "";
 
   if (cardType === "topSnack") {
     const ratedSnacks = Object.entries(snackRatings);
     if (ratedSnacks.length > 0) {
       ratedSnacks.sort((a, b) => b[1].score - a[1].score);
-      const topSnack = ratedSnacks[0][0];
-      title = "🍪 My Top Snack";
-      content = topSnack;
+      const topSnack = ratedSnacks[0];
+      title = "My Top Snack";
+      content = topSnack[0];
+      subtitle = `Loved ${topSnack[1].score} times`;
     } else {
-      content = "No snacks rated yet!";
+      title = "No Snacks Yet";
+      content = "Rate some snacks!";
     }
   } else if (cardType === "worstSnack") {
     const ratedSnacks = Object.entries(snackRatings);
     if (ratedSnacks.length > 0) {
       ratedSnacks.sort((a, b) => a[1].score - b[1].score);
-      const worstSnack = ratedSnacks[0][0];
-      title = "😤 My Worst Snack";
-      content = worstSnack;
+      const worstSnack = ratedSnacks[0];
+      title = "My Least Favorite";
+      content = worstSnack[0];
+      subtitle = `Score: ${worstSnack[1].score}`;
     } else {
-      content = "No snacks rated yet!";
+      title = "No Snacks Yet";
+      content = "Rate some snacks!";
     }
   } else if (cardType === "achievements") {
     const unlockedCount = ACHIEVEMENTS.filter(
       (a) => !!achievementsUnlocked[a.id]
     ).length;
-    title = "🏆 Achievements";
-    content = `${unlockedCount}/${ACHIEVEMENTS.length}`;
+    title = "Achievements Unlocked";
+    content = `${unlockedCount}`;
+    subtitle = `out of ${ACHIEVEMENTS.length}`;
+    ctx.font = "80px 'Cause', cursive";
+    ctx.fillText(content, 540, 500);
   } else if (cardType === "voteBreakdown") {
-    title = "📊 My Votes";
-    ctx.font = "bold 36px 'Cause', cursive";
-    ctx.fillText(title, 300, 100);
+    title = "My Vote Breakdown";
+    ctx.font = "60px 'Cause', cursive";
+    ctx.fillText(title, 540, 320);
+    
+    ctx.font = "40px 'Cause', cursive";
+    ctx.fillText(`❤️ Love: ${userStats.loveVotes}`, 540, 450);
+    ctx.fillText(`😐 Meh: ${userStats.mehVotes}`, 540, 550);
+    ctx.fillText(`😠 HATE: ${userStats.hateVotes}`, 540, 650);
+
+    // Accent line
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(200, 700);
+    ctx.lineTo(880, 700);
+    ctx.stroke();
+
+    ctx.font = "32px 'Cause', cursive";
+    ctx.fillText(`Total Votes: ${userStats.totalVotes}`, 540, 780);
+
     ctx.font = "24px 'Cause', cursive";
-    ctx.fillText(`❤️ Love: ${userStats.loveVotes}`, 300, 180);
-    ctx.fillText(`😐 Meh: ${userStats.mehVotes}`, 300, 240);
-    ctx.fillText(`😠 HATE: ${userStats.hateVotes}`, 300, 300);
-    ctx.fillText(`Total: ${userStats.totalVotes}`, 300, 380);
-    ctx.font = "14px 'Cause', cursive";
-    ctx.fillText("SnackSense | Made with 🍪 and choices", 300, 550);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.fillText("SnackSense 🍪 Made with 💫 by Jacob", 540, 1000);
     downloadCardImage(canvas);
     return;
   } else if (cardType === "favCategory") {
@@ -1556,16 +1915,56 @@ function generateShareableCard(cardType) {
       return catScore > bestScore ? cat : best;
     });
     const score = categoryScores[topCategory] || 0;
-    title = "🎯 Favorite Category";
-    content = `${topCategory} (${score} pts)`;
+    title = "Favorite Category";
+    content = topCategory;
+    subtitle = `${score} preference points`;
   }
 
-  ctx.font = "bold 36px 'Cause', cursive";
-  ctx.fillText(title, 300, 100);
+  // Title
+  ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
   ctx.font = "42px 'Cause', cursive";
-  ctx.fillText(content, 300, 280);
-  ctx.font = "14px 'Cause', cursive";
-  ctx.fillText("SnackSense | Made with 🍪 and choices", 300, 550);
+  ctx.fillText(title, 540, 440);
+
+  // Main content
+  if (cardType !== "achievements") {
+    ctx.fillStyle = "white";
+    ctx.font = "bold 70px 'Cause', cursive";
+    ctx.fillText(content, 540, 600);
+  }
+
+  // Subtitle
+  if (subtitle) {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+    ctx.font = "32px 'Cause', cursive";
+    ctx.fillText(subtitle, 540, 680);
+  }
+
+  // Accent line separator
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([10, 10]);
+  ctx.beginPath();
+  ctx.moveTo(200, 730);
+  ctx.lineTo(880, 730);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Footer branding
+  ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+  ctx.font = "28px 'Cause', cursive";
+  ctx.fillText("SnackSense 🍪", 540, 850);
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+  ctx.font = "22px 'Cause', cursive";
+  ctx.fillText("Made with 💫 by Jacob", 540, 920);
+
+  ctx.font = "18px Arial";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+  ctx.fillText("jacob.navaratne.studio", 540, 980);
+
+  // Bottom accent bar
+  ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+  ctx.fillRect(0, 1072, 1080, 8);
 
   downloadCardImage(canvas);
 }
@@ -1583,19 +1982,131 @@ function downloadCardImage(canvas) {
 }
 
 function showTutorial() {
-  crackCookie();
-
   const steps = [
-    { element: "#rating-buttons", text: "Rate each snack: Love, Meh, or HATE" },
-    { element: "#stats-btn", text: "View your detailed stats and favorite snacks" },
-    { element: "#achievements-btn", text: "Check your achievements and rarity levels" },
-    { element: "#export-data-btn", text: "Export your data as PDF, JSON, or shareable card" },
-    { element: "#theme-toggle-wrap", text: "Toggle dark mode for late-night snacking!" }
+    {
+      element: "#cookie-whole",
+      title: "Start Here",
+      text: "Click the fortune cookie, or press Space, to reveal a snack prediction.",
+      hint: "Open the cookie"
+    },
+    {
+      element: "#rating-buttons",
+      title: "Teach the App",
+      text: "Use Love, Meh, and HATE to shape future predictions. Keyboard shortcuts work too: L, M, and H.",
+      hint: "Rate the snack"
+    },
+    {
+      element: "#stats-btn",
+      title: "Your Stats",
+      text: "See your taste profile, charts, shopping assistant, and snack history in one place.",
+      hint: "Open your stats"
+    },
+    {
+      element: "#more-options-btn",
+      title: "More Options",
+      text: "Manage custom snacks, achievements, exports, and reset tools from one cleaner menu.",
+      hint: "Open more options"
+    },
+    {
+      element: "#theme-toggle-wrap",
+      title: "Theme Toggle",
+      text: "Switch between light and dark mode whenever you want a different vibe.",
+      hint: "Try the theme switch"
+    }
   ];
 
+  const overlay = document.getElementById("tutorial-overlay");
+  const pointer = document.getElementById("tutorial-pointer");
+  let tooltip = null;
   let currentStep = 0;
+  let cleanupTimer = null;
+  let stepCleanup = [];
 
-  function showStep() {
+  const clearStepCleanup = () => {
+    stepCleanup.forEach((cleanup) => cleanup());
+    stepCleanup = [];
+  };
+
+  const addStepCleanup = (cleanup) => {
+    stepCleanup.push(cleanup);
+  };
+
+  const advanceStep = () => {
+    clearStepCleanup();
+    currentStep += 1;
+    renderStep();
+  };
+
+  const watchForPrediction = () => {
+    let cancelled = false;
+    const startedAt = performance.now();
+
+    addStepCleanup(() => {
+      cancelled = true;
+    });
+
+    const tick = () => {
+      if (cancelled) {
+        return;
+      }
+
+      if (document.body.classList.contains("tutorial-active") && fortuneStrip.classList.contains("visible")) {
+        advanceStep();
+        return;
+      }
+
+      if (performance.now() - startedAt > 3200) {
+        advanceStep();
+        return;
+      }
+
+      requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+  };
+
+  const removeTooltip = () => {
+    if (tooltip) {
+      tooltip.remove();
+      tooltip = null;
+    }
+  };
+
+  const closeTutorial = () => {
+    document.body.classList.remove("tutorial-active");
+    overlay.classList.remove("visible");
+    pointer.classList.remove("visible");
+    clearStepCleanup();
+    removeTooltip();
+    window.removeEventListener("resize", refreshCurrentStep);
+    if (cleanupTimer) {
+      clearTimeout(cleanupTimer);
+      cleanupTimer = null;
+    }
+    setTimeout(() => {
+      overlay.style.display = "none";
+      pointer.style.display = "none";
+    }, 240);
+  };
+
+  const getTooltipPlacement = (rect) => {
+    const width = Math.min(360, window.innerWidth - 32);
+    const height = 210;
+    const aboveSpace = rect.top;
+    const belowSpace = window.innerHeight - rect.bottom;
+    const placeBelow = belowSpace > height + 24 || aboveSpace < height;
+
+    let top = placeBelow ? rect.bottom + 18 : rect.top - height - 18;
+    top = Math.max(16, Math.min(window.innerHeight - height - 16, top));
+
+    let left = rect.left + rect.width / 2 - width / 2;
+    left = Math.max(16, Math.min(window.innerWidth - width - 16, left));
+
+    return { top, left, width, height, placeBelow };
+  };
+
+  const renderStep = () => {
     if (currentStep >= steps.length) {
       closeTutorial();
       return;
@@ -1605,42 +2116,121 @@ function showTutorial() {
     const element = document.querySelector(step.element);
     if (!element) {
       currentStep++;
-      showStep();
+      renderStep();
       return;
     }
 
     const rect = element.getBoundingClientRect();
-    const overlay = document.getElementById("tutorial-overlay");
-    const pointer = document.getElementById("tutorial-pointer");
+    const paddingX = 16;
+    const paddingY = 12;
+    const pointerRect = {
+      left: Math.max(8, rect.left - paddingX),
+      top: Math.max(8, rect.top - paddingY),
+      width: Math.min(window.innerWidth - 16, rect.width + paddingX * 2),
+      height: Math.min(window.innerHeight - 16, rect.height + paddingY * 2)
+    };
 
     overlay.style.display = "block";
-    overlay.innerHTML = `<div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 9500;"></div>`;
-
+    overlay.style.pointerEvents = "none";
+    overlay.innerHTML = `
+      <div class="tutorial-shade tutorial-shade-top" style="height:${Math.max(0, pointerRect.top)}px"></div>
+      <div class="tutorial-shade tutorial-shade-left" style="top:${pointerRect.top}px; height:${pointerRect.height}px; width:${Math.max(0, pointerRect.left)}px"></div>
+      <div class="tutorial-shade tutorial-shade-right" style="top:${pointerRect.top}px; left:${pointerRect.left + pointerRect.width}px; height:${pointerRect.height}px; width:${Math.max(0, window.innerWidth - (pointerRect.left + pointerRect.width))}px"></div>
+      <div class="tutorial-shade tutorial-shade-bottom" style="top:${pointerRect.top + pointerRect.height}px; height:${Math.max(0, window.innerHeight - (pointerRect.top + pointerRect.height))}px"></div>
+    `;
     pointer.style.display = "block";
-    pointer.style.left = rect.left + "px";
-    pointer.style.top = rect.top + "px";
-    pointer.style.width = rect.width + "px";
-    pointer.style.height = rect.height + "px";
-    pointer.innerHTML = `<div style="position: absolute; bottom: -80px; left: 0; background: #1f9d8d; color: white; padding: 12px; border-radius: 6px; width: 200px; font-size: 14px;">${step.text}</div>`;
-  }
+    document.body.classList.add("tutorial-active");
 
-  function closeTutorial() {
-    document.getElementById("tutorial-overlay").style.display = "none";
-    document.getElementById("tutorial-pointer").style.display = "none";
-  }
+    overlay.classList.add("visible");
+    pointer.classList.add("visible");
+    pointer.style.left = `${pointerRect.left}px`;
+    pointer.style.top = `${pointerRect.top}px`;
+    pointer.style.width = `${pointerRect.width}px`;
+    pointer.style.height = `${pointerRect.height}px`;
+
+    clearStepCleanup();
+    removeTooltip();
+    const placement = getTooltipPlacement(rect);
+    tooltip = document.createElement("div");
+    tooltip.className = `tutorial-card ${placement.placeBelow ? "below" : "above"}`;
+    tooltip.style.top = `${placement.top}px`;
+    tooltip.style.left = `${placement.left}px`;
+    tooltip.style.width = `${placement.width}px`;
+
+    tooltip.innerHTML = `
+      <div class="tutorial-card-kicker">Step ${currentStep + 1} of ${steps.length}</div>
+      <h3>${step.title}</h3>
+      <p>${step.text}</p>
+      <div class="tutorial-card-meta">
+        <span>${step.hint}</span>
+        <button type="button" id="tutorial-next-btn">${currentStep === steps.length - 1 ? "Finish" : "Next"}</button>
+      </div>
+    `;
+
+    document.body.appendChild(tooltip);
+
+    const nextBtn = tooltip.querySelector("#tutorial-next-btn");
+    nextBtn.onclick = advanceStep;
+
+    if (currentStep === 0) {
+      const onCookieClick = () => watchForPrediction();
+      const onSpaceKey = (event) => {
+        if (event.code === "Space" || event.key === " ") {
+          watchForPrediction();
+        }
+      };
+
+      cookieWhole.addEventListener("click", onCookieClick);
+      addStepCleanup(() => cookieWhole.removeEventListener("click", onCookieClick));
+      document.addEventListener("keydown", onSpaceKey);
+      addStepCleanup(() => document.removeEventListener("keydown", onSpaceKey));
+    } else if (currentStep === 1) {
+      const onRatingClick = () => advanceStep();
+      const onRatingKey = (event) => {
+        const key = event.key.toLowerCase();
+        if (key === "l" || key === "m" || key === "h") {
+          advanceStep();
+        }
+      };
+
+      loveBtn.addEventListener("click", onRatingClick);
+      mehBtn.addEventListener("click", onRatingClick);
+      hateBtn.addEventListener("click", onRatingClick);
+      addStepCleanup(() => loveBtn.removeEventListener("click", onRatingClick));
+      addStepCleanup(() => mehBtn.removeEventListener("click", onRatingClick));
+      addStepCleanup(() => hateBtn.removeEventListener("click", onRatingClick));
+      document.addEventListener("keydown", onRatingKey);
+      addStepCleanup(() => document.removeEventListener("keydown", onRatingKey));
+    } else if (currentStep === 2) {
+      const onStatsClick = () => advanceStep();
+      statsBtn.addEventListener("click", onStatsClick);
+      addStepCleanup(() => statsBtn.removeEventListener("click", onStatsClick));
+    } else if (currentStep === 3) {
+      const onMoreOptionsClick = () => advanceStep();
+      moreOptionsBtn.addEventListener("click", onMoreOptionsClick);
+      addStepCleanup(() => moreOptionsBtn.removeEventListener("click", onMoreOptionsClick));
+    } else if (currentStep === 4) {
+      const onThemeChange = () => advanceStep();
+      themeToggle.addEventListener("change", onThemeChange);
+      addStepCleanup(() => themeToggle.removeEventListener("change", onThemeChange));
+    }
+
+    element.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+  };
+
+  const refreshCurrentStep = () => {
+    if (document.body.classList.contains("tutorial-active")) {
+      renderStep();
+    }
+  };
 
   setTimeout(() => {
-    document.addEventListener("click", () => {
-      currentStep++;
-      if (currentStep < steps.length) {
-        showStep();
-      } else {
-        closeTutorial();
-      }
-    });
-
-    showStep();
-  }, 1200);
+    if (currentStep === 0) {
+      renderStep();
+      window.addEventListener("resize", refreshCurrentStep);
+      cleanupTimer = setTimeout(() => {}, 0);
+    }
+  }, 900);
 }
 
 ensureUserStatsShape();
